@@ -254,6 +254,30 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    transcribeVoice: demoUserProcedure
+      .input(z.object({
+        audioBlob: z.string(), // base64 encoded audio
+      }))
+      .mutation(async ({ input }) => {
+        try {
+          const { transcribeAudio } = await import('./transcriptionService');
+          
+          // Decode base64 to buffer
+          const audioBuffer = Buffer.from(input.audioBlob, 'base64');
+          
+          // Transcribe with Whisper
+          const transcript = await transcribeAudio(new Uint8Array(audioBuffer));
+          
+          return { success: true, transcript };
+        } catch (error) {
+          console.error('[Transcription] Error:', error);
+          throw new TRPCError({ 
+            code: 'INTERNAL_SERVER_ERROR', 
+            message: error instanceof Error ? error.message : 'Failed to transcribe audio'
+          });
+        }
+      }),
+
     complete: demoUserProcedure
       .input(z.object({
         simulationId: z.number(),

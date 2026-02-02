@@ -217,3 +217,18 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 ## 🐛 Error Reportado
 
 - [x] Corregir enlaces anidados en página /scenarios
+
+## 🎯 Mejoras de Escenarios y Entrada de Voz
+
+- [x] Crear al menos 3 escenarios por cada categoría (32 escenarios totales)
+- [ ] Integrar micrófono para entrada de voz del agente
+- [ ] Implementar transcripción automática de respuestas con Whisper
+- [ ] Mejorar UI con controles de grabación de voz
+- [ ] Agregar indicador visual de grabación activa
+- [ ] Permitir alternar entre texto y voz
+
+- [x] Integrar entrada de voz con micrófono en simulaciones
+- [x] Implementar transcripción automática con Whisper API
+- [x] Mejorar UI con controles de voz (botón micrófono, indicadores)
+- [x] Alternar entre modo texto y modo voz
+- [x] Mostrar transcripción en tiempo real
