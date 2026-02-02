@@ -121,7 +121,7 @@ export default function Simulations() {
                       </div>
                       <Button asChild>
                         <Link href={`/simulation/start/${simulation.scenarioId}`}>
-                          <a>Continuar</a>
+                          Continuar
                         </Link>
                       </Button>
                     </div>
@@ -197,11 +197,9 @@ export default function Simulations() {
 
                       {/* Actions */}
                       <Button variant="outline" asChild>
-                        <Link href={`/simulations/${simulation.id}`}>
-                          <a className="flex items-center gap-2">
-                            <Eye className="w-4 h-4" />
-                            Ver Detalles
-                          </a>
+                        <Link href={`/simulations/${simulation.id}`} className="flex items-center gap-2">
+                          <Eye className="w-4 h-4" />
+                          Ver Detalles
                         </Link>
                       </Button>
                     </div>
@@ -221,7 +219,7 @@ export default function Simulations() {
                 </div>
                 <Button asChild>
                   <Link href="/scenarios">
-                    <a>Explorar Escenarios</a>
+                    Explorar Escenarios
                   </Link>
                 </Button>
               </CardContent>

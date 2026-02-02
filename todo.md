@@ -106,3 +106,10 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Sistema híbrido: usa OpenAI si está configurada, sino usa Manus LLM
 - [ ] Usuario debe ingresar API key válida en Settings → Secrets
 - [ ] Probar simulaciones con API real una vez configurada
+
+
+## 🐛 Errores Reportados
+
+- [x] Error 404 en URL principal (era falsa alarma, funciona correctamente)
+- [x] Enlaces anidados en página /simulations (corregido)
+- [ ] Verificar que no haya más enlaces anidados en otras páginas
