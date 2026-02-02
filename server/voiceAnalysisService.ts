@@ -41,6 +41,8 @@ interface WhisperResponse {
  */
 export async function analyzeVoice(audioUrl: string): Promise<{
   transcript: string;
+  segments: WhisperSegment[];
+  keywords: string[];
   metrics: VoiceMetrics;
 }> {
   try {
@@ -80,8 +82,17 @@ export async function analyzeVoice(audioUrl: string): Promise<{
 
     console.log('[Voice Analysis] Analysis completed. Overall score:', metrics.overallVoiceScore);
 
+    // Step 7: Detect keywords
+    const { detectKeywords } = await import('./keywordDetectionService');
+    const keywordAnalysis = detectKeywords(transcript);
+    const keywords = keywordAnalysis.keywords;
+
+    console.log('[Voice Analysis] Detected', keywords.length, 'unique keywords');
+
     return {
       transcript,
+      segments,
+      keywords,
       metrics,
     };
   } catch (error) {

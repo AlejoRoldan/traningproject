@@ -270,6 +270,8 @@ export const appRouter = router({
         // Upload audio to S3 and analyze voice if provided
         let audioRecordingUrl: string | null = null;
         let audioTranscript: string | null = null;
+        let transcriptSegments: string | null = null;
+        let transcriptKeywords: string | null = null;
         let voiceMetrics: string | null = null;
         
         if (input.audioBlob) {
@@ -285,6 +287,8 @@ export const appRouter = router({
               const { analyzeVoice } = await import('./voiceAnalysisService');
               const voiceAnalysis = await analyzeVoice(url);
               audioTranscript = voiceAnalysis.transcript;
+              transcriptSegments = JSON.stringify(voiceAnalysis.segments);
+              transcriptKeywords = JSON.stringify(voiceAnalysis.keywords);
               voiceMetrics = JSON.stringify(voiceAnalysis.metrics);
               console.log('[Simulation] Voice analysis completed. Overall voice score:', voiceAnalysis.metrics.overallVoiceScore);
             } catch (voiceError) {
@@ -313,6 +317,8 @@ export const appRouter = router({
             badgesEarned: JSON.stringify(evaluation.badgesEarned),
             audioRecordingUrl,
             audioTranscript,
+            transcriptSegments,
+            transcriptKeywords,
             voiceMetrics,
           })
           .where(eq(simulations.id, input.simulationId));

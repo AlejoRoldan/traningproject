@@ -135,3 +135,21 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Integrar análisis en flujo de evaluación (completo con transcripción + análisis)
 - [x] Mostrar métricas vocales en UI de detalle de simulación
 - [x] Generar insights y recomendaciones personalizadas basadas en métricas
+
+## 🎬 Transcripción Sincronizada con Audio
+
+- [ ] Actualizar esquema para almacenar segmentos de Whisper con timestamps
+- [ ] Crear componente de reproductor sincronizado
+- [ ] Resaltar palabra/frase actual durante reproducción
+- [ ] Detectar y marcar palabras clave (emocionales, protocolos, técnicas)
+- [ ] Permitir navegación por clic en transcripción
+- [ ] Mostrar indicadores visuales de pausas y momentos importantes
+
+## ✅ Progreso de Transcripción Sincronizada
+
+- [x] Actualizar esquema para almacenar segmentos de Whisper con timestamps
+- [x] Crear componente de reproductor sincronizado
+- [x] Resaltar palabra/frase actual durante reproducción
+- [x] Detectar y marcar palabras clave (emocionales, protocolos, técnicas)
+- [x] Permitir navegación por clic en transcripción
+- [x] Mostrar indicadores visuales de pausas y momentos importantes

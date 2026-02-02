@@ -29,6 +29,20 @@
       "when": 1770071360105,
       "tag": "0003_serious_blackheart",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1770071818951,
+      "tag": "0004_modern_jimmy_woo",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1770071974828,
+      "tag": "0005_handy_spectrum",
+      "breakpoints": true
     }
   ]
 }

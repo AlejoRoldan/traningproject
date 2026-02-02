@@ -25,6 +25,7 @@ import {
   Smile,
   Zap
 } from "lucide-react";
+import SyncedAudioPlayer from "@/components/SyncedAudioPlayer";
 
 export default function SimulationDetail() {
   const params = useParams();
@@ -126,8 +127,21 @@ export default function SimulationDetail() {
           </Badge>
         </div>
 
-        {/* Audio Recording Player */}
-        {simulation.audioRecordingUrl && (
+        {/* Synced Audio Player with Transcript */}
+        {simulation.audioRecordingUrl && simulation.transcriptSegments && (() => {
+          const segments = JSON.parse(simulation.transcriptSegments);
+          const keywords = simulation.transcriptKeywords ? JSON.parse(simulation.transcriptKeywords) : [];
+          return (
+            <SyncedAudioPlayer
+              audioUrl={simulation.audioRecordingUrl}
+              segments={segments}
+              keywords={keywords}
+            />
+          );
+        })()}
+
+        {/* Fallback: Simple Audio Player (if no transcript) */}
+        {simulation.audioRecordingUrl && !simulation.transcriptSegments && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
