@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useAudioRecorder } from "@/hooks/useAudioRecorder";
 import { useParams, useLocation } from "wouter";
 import TrainingDashboardLayout from "@/components/TrainingDashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +16,8 @@ import {
   AlertCircle,
   CheckCircle2,
   XCircle,
-  Loader2
+  Loader2,
+  Mic
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +38,9 @@ export default function SimulationSession() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  
+  // Audio recording
+  const audioRecorder = useAudioRecorder();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -76,6 +81,12 @@ export default function SimulationSession() {
             timerRef.current = setInterval(() => {
               setElapsedTime(prev => prev + 1);
             }, 1000);
+            
+            // Start audio recording
+            audioRecorder.startRecording().catch((error) => {
+              console.error('Error starting audio recording:', error);
+              toast.error('No se pudo iniciar la grabación de audio');
+            });
           },
           onError: () => {
             toast.error("Error al iniciar la simulación");
@@ -143,10 +154,34 @@ export default function SimulationSession() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
     }
+    
+    // Stop audio recording
+    audioRecorder.stopRecording();
+    
+    // Wait a bit for the recording to finalize
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Convert audio blob to base64
+    let audioBase64: string | undefined;
+    if (audioRecorder.audioBlob) {
+      try {
+        audioBase64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const base64 = (reader.result as string).split(',')[1];
+            resolve(base64);
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(audioRecorder.audioBlob!);
+        });
+      } catch (error) {
+        console.error('Error converting audio to base64:', error);
+      }
+    }
 
     // Call GPT evaluation
     completeSimulationMutation.mutate(
-      { simulationId },
+      { simulationId, audioBlob: audioBase64 },
       {
         onSuccess: (data) => {
           setIsCompleted(true);
@@ -209,6 +244,13 @@ export default function SimulationSession() {
             </div>
             
             <div className="flex items-center gap-6">
+              {audioRecorder.isRecording && (
+                <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                  <Mic className="w-5 h-5 animate-pulse" />
+                  <span className="text-sm font-medium">Grabando</span>
+                </div>
+              )}
+              
               <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-muted-foreground" />
                 <span className="text-lg font-mono font-semibold text-foreground">

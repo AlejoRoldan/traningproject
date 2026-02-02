@@ -15,6 +15,13 @@
       "when": 1770068535605,
       "tag": "0001_chief_sprite",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1770070979620,
+      "tag": "0002_safe_marvex",
+      "breakpoints": true
     }
   ]
 }

@@ -239,6 +239,7 @@ export const appRouter = router({
     complete: protectedProcedure
       .input(z.object({
         simulationId: z.number(),
+        audioBlob: z.string().optional(), // base64 encoded audio
       }))
       .mutation(async ({ ctx, input }) => {
         const database = await getDb();
@@ -266,6 +267,21 @@ export const appRouter = router({
         
         const duration = Math.floor((Date.now() - simulation.startedAt.getTime()) / 1000);
         
+        // Upload audio to S3 if provided
+        let audioRecordingUrl: string | null = null;
+        if (input.audioBlob) {
+          try {
+            const { storagePut } = await import('./storage');
+            const audioBuffer = Buffer.from(input.audioBlob, 'base64');
+            const audioKey = `simulations/${ctx.user.id}/${input.simulationId}-${Date.now()}.webm`;
+            const { url } = await storagePut(audioKey, audioBuffer, 'audio/webm');
+            audioRecordingUrl = url;
+          } catch (error) {
+            console.error('Error uploading audio to S3:', error);
+            // Continue without audio if upload fails
+          }
+        }
+        
         // Update simulation with evaluation results
         await database.update(simulations)
           .set({
@@ -280,6 +296,7 @@ export const appRouter = router({
             recommendations: JSON.stringify(evaluation.recommendations),
             pointsEarned: evaluation.pointsEarned,
             badgesEarned: JSON.stringify(evaluation.badgesEarned),
+            audioRecordingUrl,
           })
           .where(eq(simulations.id, input.simulationId));
 

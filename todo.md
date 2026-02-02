@@ -113,3 +113,13 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Error 404 en URL principal (era falsa alarma, funciona correctamente)
 - [x] Enlaces anidados en página /simulations (corregido)
 - [ ] Verificar que no haya más enlaces anidados en otras páginas
+
+
+## 🎤️ Sistema de Grabación y Reproducción de Audio
+
+- [x] Actualizar esquema de BD para almacenar URL de audio
+- [x] Implementar grabación de audio en frontend (MediaRecorder API)
+- [x] Subir audio a S3 al finalizar simulación
+- [x] Agregar reproductor de audio en detalle de simulación
+- [x] Indicador visual de grabación en simulación activa
+- [ ] (Opcional) Transcripción automática con Whisper API

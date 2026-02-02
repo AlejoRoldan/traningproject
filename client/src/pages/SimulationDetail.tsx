@@ -16,7 +16,10 @@ import {
   MessageSquare,
   Lightbulb,
   Target,
-  AlertTriangle
+  AlertTriangle,
+  Play,
+  Pause,
+  Volume2
 } from "lucide-react";
 
 export default function SimulationDetail() {
@@ -118,6 +121,27 @@ export default function SimulationDetail() {
             {simulation.status === "completed" ? "Completada" : "En progreso"}
           </Badge>
         </div>
+
+        {/* Audio Recording Player */}
+        {simulation.audioRecordingUrl && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Volume2 className="w-5 h-5" />
+                Grabación de Audio
+              </CardTitle>
+              <CardDescription>
+                Escucha la grabación completa de tu simulación
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <audio controls className="w-full">
+                <source src={simulation.audioRecordingUrl} type="audio/webm" />
+                Tu navegador no soporta la reproducción de audio.
+              </audio>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Overall Score Card */}
         {simulation.overallScore !== null && (

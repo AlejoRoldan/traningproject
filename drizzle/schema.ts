@@ -74,6 +74,8 @@ export const simulations = mysqlTable("simulations", {
   recommendations: text("recommendations"), // JSON array
   pointsEarned: int("pointsEarned").default(0),
   badgesEarned: text("badgesEarned"), // JSON array
+  audioRecordingUrl: text("audioRecordingUrl"), // S3 URL of audio recording
+  audioTranscript: text("audioTranscript"), // Optional: Whisper API transcription
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
