@@ -196,3 +196,20 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Crear usuario demo en backend (DEMO_USER)
 - [x] Eliminar validaciones de roles y permisos
 - [x] Verificar funcionamiento completo sin autenticación
+
+## 🔊 Síntesis de Voz Realista (TTS)
+
+- [ ] Crear servicio de Text-to-Speech con OpenAI TTS API
+- [ ] Seleccionar voces según género del cliente (masculina/femenina)
+- [ ] Generar audio para cada respuesta del cliente
+- [ ] Reproducir automáticamente en el frontend
+- [ ] Agregar indicador visual cuando el cliente está "hablando"
+- [ ] Implementar cache de audio para reducir costos
+
+## ✅ TTS Completado
+
+- [x] Crear servicio de Text-to-Speech con OpenAI TTS API
+- [x] Seleccionar voces según género del cliente (masculina/femenina)
+- [x] Generar audio para cada respuesta del cliente
+- [x] Reproducir automáticamente en el frontend
+- [x] Agregar indicador visual cuando el cliente está "hablando"

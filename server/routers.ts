@@ -7,6 +7,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
 import { evaluateSimulation, generateClientResponse } from "./evaluationService";
+import { generateSpeech, detectGenderFromProfile } from "./ttsService";
+import { storagePut } from "./storage";
+import { nanoid } from "nanoid";
 import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
@@ -226,7 +229,26 @@ export const appRouter = router({
             content: clientResponse,
           });
 
-          return { success: true, clientResponse };
+          // Generate TTS audio for client response
+          let audioUrl: string | undefined;
+          try {
+            const gender = detectGenderFromProfile(scenario.clientProfile);
+            const audioBuffer = await generateSpeech({
+              text: clientResponse,
+              gender: gender,
+              speed: 1.0,
+            });
+
+            // Upload audio to S3
+            const audioKey = `tts/${ctx.user.id}/${input.simulationId}-${nanoid(8)}.mp3`;
+            const uploadResult = await storagePut(audioKey, audioBuffer, "audio/mpeg");
+            audioUrl = uploadResult.url;
+          } catch (error) {
+            console.error("[TTS] Failed to generate audio:", error);
+            // Continue without audio if TTS fails
+          }
+
+          return { success: true, clientResponse, audioUrl };
         }
         
         return { success: true };

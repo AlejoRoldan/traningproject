@@ -25,6 +25,7 @@ interface Message {
   role: "agent" | "client" | "system";
   content: string;
   timestamp: Date;
+  audioUrl?: string; // URL del audio TTS para mensajes del cliente
 }
 
 export default function SimulationSession() {
@@ -38,9 +39,11 @@ export default function SimulationSession() {
   const [isCompleted, setIsCompleted] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isEvaluating, setIsEvaluating] = useState(false);
+  const [isClientSpeaking, setIsClientSpeaking] = useState(false);
   
   // Audio recording
   const audioRecorder = useAudioRecorder();
+  const audioPlayerRef = useRef<HTMLAudioElement | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -111,6 +114,28 @@ export default function SimulationSession() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Play client audio with TTS
+  const playClientAudio = (audioUrl: string) => {
+    if (audioPlayerRef.current) {
+      audioPlayerRef.current.pause();
+    }
+
+    const audio = new Audio(audioUrl);
+    audioPlayerRef.current = audio;
+
+    audio.onplay = () => setIsClientSpeaking(true);
+    audio.onended = () => setIsClientSpeaking(false);
+    audio.onerror = () => {
+      setIsClientSpeaking(false);
+      console.error("Error playing client audio");
+    };
+
+    audio.play().catch((error) => {
+      console.error("Failed to play audio:", error);
+      setIsClientSpeaking(false);
+    });
+  };
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !simulationId || isCompleted) return;
 
@@ -133,9 +158,15 @@ export default function SimulationSession() {
             const clientResponse: Message = {
               role: "client",
               content: data.clientResponse,
-              timestamp: new Date()
+              timestamp: new Date(),
+              audioUrl: data.audioUrl,
             };
             setMessages(prev => [...prev, clientResponse]);
+
+            // Play audio automatically if available
+            if (data.audioUrl) {
+              playClientAudio(data.audioUrl);
+            }
           }
         },
         onError: () => {
@@ -293,11 +324,19 @@ export default function SimulationSession() {
                 }`}
               >
                 {message.role !== "agent" && (
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center relative ${
                     message.role === "client" ? "bg-primary/10" : "bg-muted"
                   }`}>
                     {message.role === "client" ? (
-                      <User className="w-5 h-5 text-primary" />
+                      <>
+                        <User className="w-5 h-5 text-primary" />
+                        {isClientSpeaking && message === messages[messages.length - 1] && (
+                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+                          </span>
+                        )}
+                      </>
                     ) : (
                       <AlertCircle className="w-5 h-5 text-muted-foreground" />
                     )}
