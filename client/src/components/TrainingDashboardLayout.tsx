@@ -144,19 +144,19 @@ export default function TrainingDashboardLayout({ children }: { children: React.
             const isActive = location === item.href || location.startsWith(item.href + "/");
             
             return (
-              <Link key={item.href} href={item.href}>
-                <a
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
-                    ${isActive 
-                      ? "bg-primary text-primary-foreground shadow-sm" 
-                      : "text-foreground hover:bg-accent hover:text-accent-foreground"
-                    }
-                  `}
-                >
-                  <Icon className="w-5 h-5" />
-                  {item.label}
-                </a>
+              <Link 
+                key={item.href} 
+                href={item.href}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
+                  ${isActive 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                  }
+                `}
+              >
+                <Icon className="w-5 h-5" />
+                {item.label}
               </Link>
             );
           })}
@@ -165,11 +165,9 @@ export default function TrainingDashboardLayout({ children }: { children: React.
         {/* Footer Actions */}
         <div className="p-4 border-t border-border space-y-2">
           <Button variant="ghost" className="w-full justify-start" asChild>
-            <Link href="/settings">
-              <a className="flex items-center gap-3">
-                <Settings className="w-5 h-5" />
-                Configuración
-              </a>
+            <Link href="/settings" className="flex items-center gap-3">
+              <Settings className="w-5 h-5" />
+              Configuración
             </Link>
           </Button>
           <Button 

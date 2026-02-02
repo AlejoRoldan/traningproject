@@ -224,14 +224,14 @@ export async function getUserImprovementPlans(userId: number) {
 
 export async function getActiveImprovementPlan(userId: number) {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   
   const result = await db.select().from(improvementPlans)
     .where(and(eq(improvementPlans.userId, userId), eq(improvementPlans.status, 'active')))
     .orderBy(desc(improvementPlans.createdAt))
     .limit(1);
   
-  return result.length > 0 ? result[0] : undefined;
+  return result.length > 0 ? result[0] : null;
 }
 
 // Badges queries

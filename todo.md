@@ -89,3 +89,11 @@
 **COMPLETO Y LISTO PARA USO**
 
 Todas las funcionalidades solicitadas han sido implementadas y probadas exitosamente.
+
+
+## 🐛 Errores Corregidos
+
+- [x] Corregir enlaces anidados (<a> dentro de <a>) en Dashboard
+- [x] Corregir enlaces anidados en TrainingDashboardLayout
+- [x] Corregir query improvementPlans.activePlan que retorna undefined (ahora retorna null)
+- [x] Asegurar que todas las queries retornen valores válidos

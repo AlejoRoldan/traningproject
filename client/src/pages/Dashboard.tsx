@@ -177,11 +177,9 @@ export default function Dashboard() {
               </div>
 
               <Button className="w-full" asChild>
-                <Link href="/gamification">
-                  <a className="flex items-center justify-center gap-2">
-                    Ver Gamificación Completa
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
+                <Link href="/gamification" className="flex items-center justify-center gap-2">
+                  Ver Gamificación Completa
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </Button>
             </CardContent>
@@ -210,7 +208,7 @@ export default function Dashboard() {
 
                   <Button variant="outline" className="w-full" asChild>
                     <Link href="/progress">
-                      <a>Ver Detalles</a>
+                      Ver Detalles
                     </Link>
                   </Button>
                 </div>
@@ -263,7 +261,7 @@ export default function Dashboard() {
                     
                     <Button variant="ghost" size="sm" asChild>
                       <Link href={`/simulations/${sim.id}`}>
-                        <a>Ver Detalles</a>
+                        Ver Detalles
                       </Link>
                     </Button>
                   </div>
@@ -279,11 +277,9 @@ export default function Dashboard() {
                   </p>
                 </div>
                 <Button asChild>
-                  <Link href="/scenarios">
-                    <a className="flex items-center gap-2">
-                      Ver Escenarios
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
+                  <Link href="/scenarios" className="flex items-center gap-2">
+                    Ver Escenarios
+                    <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
               </div>
@@ -294,32 +290,26 @@ export default function Dashboard() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Button size="lg" className="h-auto py-6" asChild>
-            <Link href="/scenarios">
-              <a className="flex flex-col items-center gap-2">
-                <BookOpen className="w-6 h-6" />
-                <span className="font-semibold">Explorar Escenarios</span>
-                <span className="text-xs opacity-90">Encuentra tu próximo desafío</span>
-              </a>
+            <Link href="/scenarios" className="flex flex-col items-center gap-2">
+              <BookOpen className="w-6 h-6" />
+              <span className="font-semibold">Explorar Escenarios</span>
+              <span className="text-xs opacity-90">Encuentra tu próximo desafío</span>
             </Link>
           </Button>
 
           <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/simulations">
-              <a className="flex flex-col items-center gap-2">
-                <Target className="w-6 h-6" />
-                <span className="font-semibold">Mis Simulaciones</span>
-                <span className="text-xs opacity-90">Revisa tu historial</span>
-              </a>
+            <Link href="/simulations" className="flex flex-col items-center gap-2">
+              <Target className="w-6 h-6" />
+              <span className="font-semibold">Mis Simulaciones</span>
+              <span className="text-xs opacity-90">Revisa tu historial</span>
             </Link>
           </Button>
 
           <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/progress">
-              <a className="flex flex-col items-center gap-2">
-                <TrendingUp className="w-6 h-6" />
-                <span className="font-semibold">Mi Progreso</span>
-                <span className="text-xs opacity-90">Analiza tu evolución</span>
-              </a>
+            <Link href="/progress" className="flex flex-col items-center gap-2">
+              <TrendingUp className="w-6 h-6" />
+              <span className="font-semibold">Ver Progreso</span>
+              <span className="text-xs opacity-90">Analiza tu evolución</span>
             </Link>
           </Button>
         </div>
