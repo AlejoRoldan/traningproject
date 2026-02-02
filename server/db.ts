@@ -1,6 +1,20 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, and, gte, lte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, 
+  users, 
+  scenarios, 
+  simulations, 
+  messages, 
+  improvementPlans, 
+  badges, 
+  userBadges, 
+  teamStats,
+  type Scenario,
+  type Simulation,
+  type ImprovementPlan,
+  type Badge
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -35,7 +49,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     };
     const updateSet: Record<string, unknown> = {};
 
-    const textFields = ["name", "email", "loginMethod"] as const;
+    const textFields = ["name", "email", "loginMethod", "department"] as const;
     type TextField = (typeof textFields)[number];
 
     const assignNullable = (field: TextField) => {
@@ -52,12 +66,31 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.lastSignedIn = user.lastSignedIn;
       updateSet.lastSignedIn = user.lastSignedIn;
     }
+    
     if (user.role !== undefined) {
       values.role = user.role;
       updateSet.role = user.role;
     } else if (user.openId === ENV.ownerOpenId) {
       values.role = 'admin';
       updateSet.role = 'admin';
+    } else {
+      values.role = 'agent'; // Default role
+      updateSet.role = 'agent';
+    }
+
+    if (user.supervisorId !== undefined) {
+      values.supervisorId = user.supervisorId;
+      updateSet.supervisorId = user.supervisorId;
+    }
+
+    if (user.level !== undefined) {
+      values.level = user.level;
+      updateSet.level = user.level;
+    }
+
+    if (user.points !== undefined) {
+      values.points = user.points;
+      updateSet.points = user.points;
     }
 
     if (!values.lastSignedIn) {
@@ -89,4 +122,166 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Scenarios queries
+export async function getAllScenarios() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(scenarios).where(eq(scenarios.isActive, 1)).orderBy(scenarios.complexity, scenarios.title);
+}
+
+export async function getScenarioById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(scenarios).where(eq(scenarios.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getScenariosByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(scenarios)
+    .where(and(eq(scenarios.category, category as any), eq(scenarios.isActive, 1)))
+    .orderBy(scenarios.complexity);
+}
+
+export async function getScenariosByComplexity(complexity: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(scenarios)
+    .where(and(eq(scenarios.complexity, complexity), eq(scenarios.isActive, 1)))
+    .orderBy(scenarios.title);
+}
+
+// Simulations queries
+export async function getUserSimulations(userId: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(simulations)
+    .where(eq(simulations.userId, userId))
+    .orderBy(desc(simulations.startedAt))
+    .limit(limit);
+}
+
+export async function getSimulationById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(simulations).where(eq(simulations.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getSimulationMessages(simulationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(messages)
+    .where(eq(messages.simulationId, simulationId))
+    .orderBy(messages.timestamp);
+}
+
+// User statistics
+export async function getUserStats(userId: number) {
+  const db = await getDb();
+  if (!db) return null;
+  
+  const userSims = await db.select().from(simulations)
+    .where(and(eq(simulations.userId, userId), eq(simulations.status, 'completed')));
+  
+  if (userSims.length === 0) {
+    return {
+      totalSimulations: 0,
+      averageScore: 0,
+      completionRate: 0,
+      totalPoints: 0
+    };
+  }
+  
+  const totalScore = userSims.reduce((sum, sim) => sum + (sim.overallScore || 0), 0);
+  const totalPoints = userSims.reduce((sum, sim) => sum + (sim.pointsEarned || 0), 0);
+  
+  return {
+    totalSimulations: userSims.length,
+    averageScore: Math.round(totalScore / userSims.length),
+    completionRate: 100, // All are completed in this query
+    totalPoints
+  };
+}
+
+// Improvement plans queries
+export async function getUserImprovementPlans(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(improvementPlans)
+    .where(eq(improvementPlans.userId, userId))
+    .orderBy(desc(improvementPlans.createdAt));
+}
+
+export async function getActiveImprovementPlan(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(improvementPlans)
+    .where(and(eq(improvementPlans.userId, userId), eq(improvementPlans.status, 'active')))
+    .orderBy(desc(improvementPlans.createdAt))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// Badges queries
+export async function getAllBadges() {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(badges).orderBy(badges.category, badges.rarity);
+}
+
+export async function getUserBadges(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select({
+    badge: badges,
+    earnedAt: userBadges.earnedAt,
+    simulationId: userBadges.simulationId
+  })
+  .from(userBadges)
+  .innerJoin(badges, eq(userBadges.badgeId, badges.id))
+  .where(eq(userBadges.userId, userId))
+  .orderBy(desc(userBadges.earnedAt));
+}
+
+// Team/Supervisor queries
+export async function getTeamMembers(supervisorId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(users)
+    .where(eq(users.supervisorId, supervisorId))
+    .orderBy(users.name);
+}
+
+export async function getDepartmentMembers(department: string) {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(users)
+    .where(eq(users.department, department))
+    .orderBy(users.name);
+}
+
+export async function getTeamStats(supervisorId: number, period: 'daily' | 'weekly' | 'monthly') {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(teamStats)
+    .where(and(eq(teamStats.supervisorId, supervisorId), eq(teamStats.period, period)))
+    .orderBy(desc(teamStats.periodDate))
+    .limit(30);
+}

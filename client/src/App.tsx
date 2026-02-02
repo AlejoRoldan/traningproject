@@ -1,17 +1,34 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import Scenarios from "./pages/Scenarios";
+import SimulationSession from "./pages/SimulationSession";
+import Simulations from "./pages/Simulations";
+import SimulationDetail from "./pages/SimulationDetail";
+import Progress from "./pages/Progress";
+import Gamification from "./pages/Gamification";
+import Team from "./pages/Team";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path="/">
+        <Redirect to="/dashboard" />
+      </Route>
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/scenarios" component={Scenarios} />
+      <Route path="/scenarios/:id" component={Scenarios} />
+      <Route path="/simulation/start/:scenarioId" component={SimulationSession} />
+      <Route path="/simulations" component={Simulations} />
+      <Route path="/simulations/:id" component={SimulationDetail} />
+      <Route path="/progress" component={Progress} />
+      <Route path="/gamification" component={Gamification} />
+      <Route path="/team" component={Team} />
+      <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
