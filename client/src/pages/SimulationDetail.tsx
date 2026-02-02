@@ -136,6 +136,7 @@ export default function SimulationDetail() {
               audioUrl={simulation.audioRecordingUrl}
               segments={segments}
               keywords={keywords}
+              simulationId={simulation.id}
             />
           );
         })()}

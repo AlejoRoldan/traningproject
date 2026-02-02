@@ -85,6 +85,23 @@ export const simulations = mysqlTable("simulations", {
 export type Simulation = typeof simulations.$inferSelect;
 export type InsertSimulation = typeof simulations.$inferInsert;
 
+/**
+ * Audio Markers - Temporal markers added by supervisors during playback
+ */
+export const audioMarkers = mysqlTable("audio_markers", {
+  id: int("id").autoincrement().primaryKey(),
+  simulationId: int("simulationId").notNull(),
+  createdBy: int("createdBy").notNull(), // userId of supervisor/trainer
+  timestamp: int("timestamp").notNull(), // seconds in audio
+  category: mysqlEnum("category", ["excellent", "good", "needs_improvement", "critical_error"]).notNull(),
+  note: text("note"), // Optional comment
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AudioMarker = typeof audioMarkers.$inferSelect;
+export type InsertAudioMarker = typeof audioMarkers.$inferInsert;
+
 // Messages table - Individual messages within simulations
 export const messages = mysqlTable("messages", {
   id: int("id").autoincrement().primaryKey(),

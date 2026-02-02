@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, SkipBack, SkipForward, Volume2 } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Volume2, Flag, Plus, Edit, Trash2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 
 interface TranscriptSegment {
@@ -11,13 +18,27 @@ interface TranscriptSegment {
   text: string;
 }
 
+interface AudioMarker {
+  id: number;
+  simulationId: number;
+  createdBy: number;
+  timestamp: number;
+  category: 'excellent' | 'good' | 'needs_improvement' | 'critical_error';
+  note: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 interface SyncedAudioPlayerProps {
   audioUrl: string;
   segments: TranscriptSegment[];
   keywords?: string[];
+  simulationId: number;
 }
 
-export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }: SyncedAudioPlayerProps) {
+export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [], simulationId }: SyncedAudioPlayerProps) {
+  const { user } = useAuth();
+  const utils = trpc.useUtils();
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -25,6 +46,41 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }:
   const [volume, setVolume] = useState(1);
   const [activeSegmentIndex, setActiveSegmentIndex] = useState<number | null>(null);
   const segmentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  
+  // Marker state
+  const [isMarkerDialogOpen, setIsMarkerDialogOpen] = useState(false);
+  const [markerCategory, setMarkerCategory] = useState<'excellent' | 'good' | 'needs_improvement' | 'critical_error'>('good');
+  const [markerNote, setMarkerNote] = useState('');
+  const [markerTimestamp, setMarkerTimestamp] = useState(0);
+  
+  // Fetch markers
+  const markersQuery = trpc.audioMarkers.list.useQuery({ simulationId });
+  const markers = markersQuery.data || [];
+  
+  // Mutations
+  const createMarker = trpc.audioMarkers.create.useMutation({
+    onSuccess: () => {
+      utils.audioMarkers.list.invalidate({ simulationId });
+      toast.success('Marcador agregado exitosamente');
+      setIsMarkerDialogOpen(false);
+      setMarkerNote('');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Error al crear marcador');
+    },
+  });
+  
+  const deleteMarker = trpc.audioMarkers.delete.useMutation({
+    onSuccess: () => {
+      utils.audioMarkers.list.invalidate({ simulationId });
+      toast.success('Marcador eliminado');
+    },
+    onError: (error) => {
+      toast.error(error.message || 'Error al eliminar marcador');
+    },
+  });
+  
+  const isSupervisor = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'trainer';
 
   // Update current time
   useEffect(() => {
@@ -140,6 +196,46 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }:
       );
     });
   };
+  
+  const handleAddMarker = () => {
+    setMarkerTimestamp(Math.floor(currentTime));
+    setIsMarkerDialogOpen(true);
+  };
+  
+  const handleCreateMarker = () => {
+    createMarker.mutate({
+      simulationId,
+      timestamp: markerTimestamp,
+      category: markerCategory,
+      note: markerNote || undefined,
+    });
+  };
+  
+  const handleDeleteMarker = (markerId: number) => {
+    if (confirm('¿Estás seguro de eliminar este marcador?')) {
+      deleteMarker.mutate({ id: markerId });
+    }
+  };
+  
+  const getMarkerColor = (category: string) => {
+    switch (category) {
+      case 'excellent': return 'bg-green-500';
+      case 'good': return 'bg-blue-500';
+      case 'needs_improvement': return 'bg-yellow-500';
+      case 'critical_error': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+  
+  const getMarkerLabel = (category: string) => {
+    switch (category) {
+      case 'excellent': return 'Excelente';
+      case 'good': return 'Bueno';
+      case 'needs_improvement': return 'Necesita Mejora';
+      case 'critical_error': return 'Error Crítico';
+      default: return category;
+    }
+  };
 
   return (
     <Card>
@@ -158,15 +254,43 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }:
 
         {/* Audio Controls */}
         <div className="space-y-4">
-          {/* Progress Bar */}
+          {/* Progress Bar with Markers */}
           <div className="space-y-2">
-            <Slider
-              value={[currentTime]}
-              max={duration || 100}
-              step={0.1}
-              onValueChange={handleSeek}
-              className="w-full"
-            />
+            <div className="relative">
+              <Slider
+                value={[currentTime]}
+                max={duration || 100}
+                step={0.1}
+                onValueChange={handleSeek}
+                className="w-full"
+              />
+              {/* Marker flags on timeline */}
+              {markers.map((marker) => {
+                const position = duration > 0 ? (marker.timestamp / duration) * 100 : 0;
+                return (
+                  <div
+                    key={marker.id}
+                    className="absolute top-0 -translate-x-1/2 cursor-pointer group"
+                    style={{ left: `${position}%` }}
+                    onClick={() => jumpToSegment(marker.timestamp)}
+                  >
+                    <Flag
+                      className={`w-4 h-4 ${getMarkerColor(marker.category)} text-white fill-current drop-shadow-md`}
+                    />
+                    {/* Tooltip on hover */}
+                    <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 hidden group-hover:block z-10">
+                      <div className="bg-popover text-popover-foreground px-3 py-2 rounded-lg shadow-lg text-xs whitespace-nowrap border">
+                        <div className="font-semibold">{getMarkerLabel(marker.category)}</div>
+                        <div className="text-muted-foreground">{formatTime(marker.timestamp)}</div>
+                        {marker.note && (
+                          <div className="mt-1 max-w-xs">{marker.note}</div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{formatTime(currentTime)}</span>
               <span>{formatTime(duration)}</span>
@@ -217,8 +341,66 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }:
                 className="w-24"
               />
             </div>
+            
+            {/* Add Marker Button (Supervisors only) */}
+            {isSupervisor && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAddMarker}
+                disabled={!duration}
+                className="ml-4"
+              >
+                <Flag className="w-4 h-4 mr-2" />
+                Agregar Marcador
+              </Button>
+            )}
           </div>
         </div>
+        
+        {/* Markers Timeline */}
+        {markers.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-foreground">Marcadores ({markers.length})</h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {markers.map((marker) => (
+                <div
+                  key={marker.id}
+                  className="flex items-start gap-3 p-2 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer transition-colors"
+                  onClick={() => jumpToSegment(marker.timestamp)}
+                >
+                  <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${getMarkerColor(marker.category)}`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-xs font-mono text-muted-foreground">
+                        {formatTime(marker.timestamp)}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${getMarkerColor(marker.category)} text-white`}>
+                        {getMarkerLabel(marker.category)}
+                      </span>
+                    </div>
+                    {marker.note && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">{marker.note}</p>
+                    )}
+                  </div>
+                  {isSupervisor && marker.createdBy === user?.id && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteMarker(marker.id);
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Transcript with Highlighting */}
         <div className="border rounded-lg p-4 max-h-96 overflow-y-auto bg-muted/30">
@@ -269,6 +451,84 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [] }:
           </div>
         )}
       </CardContent>
+      
+      {/* Add Marker Dialog */}
+      <Dialog open={isMarkerDialogOpen} onOpenChange={setIsMarkerDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Agregar Marcador</DialogTitle>
+            <DialogDescription>
+              Marca este momento en {formatTime(markerTimestamp)} con una categoría y nota opcional.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Categoría</Label>
+              <Select
+                value={markerCategory}
+                onValueChange={(value: any) => setMarkerCategory(value)}
+              >
+                <SelectTrigger id="category">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="excellent">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500" />
+                      Excelente
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="good">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-blue-500" />
+                      Bueno
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="needs_improvement">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-500" />
+                      Necesita Mejora
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="critical_error">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-500" />
+                      Error Crítico
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="note">Nota (opcional)</Label>
+              <Textarea
+                id="note"
+                placeholder="Agrega un comentario sobre este momento..."
+                value={markerNote}
+                onChange={(e) => setMarkerNote(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsMarkerDialogOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateMarker}
+              disabled={createMarker.isPending}
+            >
+              {createMarker.isPending ? 'Guardando...' : 'Guardar Marcador'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

@@ -153,3 +153,27 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Detectar y marcar palabras clave (emocionales, protocolos, técnicas)
 - [x] Permitir navegación por clic en transcripción
 - [x] Mostrar indicadores visuales de pausas y momentos importantes
+
+## 🚩 Sistema de Marcadores Temporales
+
+- [ ] Crear tabla de marcadores en base de datos
+- [ ] Implementar API endpoints para CRUD de marcadores
+- [ ] Agregar botón "Agregar Marcador" en reproductor
+- [ ] Modal para crear marcador con categoría y notas
+- [ ] Visualizar marcadores en timeline como banderas
+- [ ] Permitir editar/eliminar marcadores
+- [ ] Saltar a marcador haciendo clic
+- [ ] Restricción: solo supervisores/trainers pueden agregar marcadores
+
+## ✅ Sistema de Marcadores Completado
+
+- [x] Crear tabla de marcadores en base de datos
+- [x] Implementar API endpoints para CRUD de marcadores
+- [x] Agregar botón "Agregar Marcador" en reproductor
+- [x] Modal para crear marcador con categoría y notas
+- [x] Visualizar marcadores en timeline como banderas
+- [x] Permitir editar/eliminar marcadores
+- [x] Saltar a marcador haciendo clic
+- [x] Restricción: solo supervisores/trainers pueden agregar marcadores
+- [x] Tooltips con información del marcador al hacer hover
+- [x] Banderas de colores según categoría en la línea de tiempo

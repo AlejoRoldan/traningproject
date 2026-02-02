@@ -43,6 +43,13 @@
       "when": 1770071974828,
       "tag": "0005_handy_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1770072210084,
+      "tag": "0006_crazy_mercury",
+      "breakpoints": true
     }
   ]
 }

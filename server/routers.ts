@@ -7,7 +7,7 @@ import { z } from "zod";
 import * as db from "./db";
 import { evaluateSimulation, generateClientResponse } from "./evaluationService";
 import { getDb } from "./db";
-import { scenarios, simulations, messages, improvementPlans, badges, userBadges } from "../drizzle/schema";
+import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
 // Admin-only procedure
@@ -386,7 +386,107 @@ export const appRouter = router({
         period: z.enum(['daily', 'weekly', 'monthly']).optional() 
       }))
       .query(async ({ ctx, input }) => {
-        return await db.getTeamStats(ctx.user.id, input.period || 'weekly');
+      return await db.getTeamStats(ctx.user.id, input.period || 'weekly');
+    }),
+  }),
+
+  // Audio Markers router (for supervisors to add temporal markers)
+  audioMarkers: router({
+    list: protectedProcedure
+      .input(z.object({ simulationId: z.number() }))
+      .query(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        return await database
+          .select()
+          .from(audioMarkers)
+          .where(eq(audioMarkers.simulationId, input.simulationId))
+          .orderBy(audioMarkers.timestamp);
+      }),
+
+    create: supervisorProcedure
+      .input(z.object({
+        simulationId: z.number(),
+        timestamp: z.number(),
+        category: z.enum(['excellent', 'good', 'needs_improvement', 'critical_error']),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        const [marker] = await database.insert(audioMarkers).values({
+          simulationId: input.simulationId,
+          createdBy: ctx.user.id,
+          timestamp: input.timestamp,
+          category: input.category,
+          note: input.note || null,
+        });
+        
+        return { success: true, markerId: marker.insertId };
+      }),
+
+    update: supervisorProcedure
+      .input(z.object({
+        id: z.number(),
+        category: z.enum(['excellent', 'good', 'needs_improvement', 'critical_error']).optional(),
+        note: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        // Verify ownership or admin/supervisor role
+        const [existing] = await database
+          .select()
+          .from(audioMarkers)
+          .where(eq(audioMarkers.id, input.id))
+          .limit(1);
+        
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Marcador no encontrado' });
+        }
+        
+        if (existing.createdBy !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'No puedes editar este marcador' });
+        }
+        
+        await database
+          .update(audioMarkers)
+          .set({
+            category: input.category || existing.category,
+            note: input.note !== undefined ? input.note : existing.note,
+          })
+          .where(eq(audioMarkers.id, input.id));
+        
+        return { success: true };
+      }),
+
+    delete: supervisorProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        // Verify ownership or admin role
+        const [existing] = await database
+          .select()
+          .from(audioMarkers)
+          .where(eq(audioMarkers.id, input.id))
+          .limit(1);
+        
+        if (!existing) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Marcador no encontrado' });
+        }
+        
+        if (existing.createdBy !== ctx.user.id && ctx.user.role !== 'admin') {
+          throw new TRPCError({ code: 'FORBIDDEN', message: 'No puedes eliminar este marcador' });
+        }
+        
+        await database.delete(audioMarkers).where(eq(audioMarkers.id, input.id));
+        
+        return { success: true };
       }),
   }),
 });
