@@ -1,7 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { publicProcedure, router } from "./_core/trpc";
+import { DEMO_USER } from "./demoUser";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import * as db from "./db";
@@ -10,21 +11,16 @@ import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
-// Admin-only procedure
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== 'admin' && ctx.user.role !== 'supervisor') {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'Acceso denegado' });
-  }
-  return next({ ctx });
+// Demo user procedure (no authentication required)
+const demoUserProcedure = publicProcedure.use(({ ctx, next }) => {
+  // Use authenticated user if available, otherwise use demo user
+  const user = ctx.user || DEMO_USER;
+  return next({ ctx: { ...ctx, user } });
 });
 
-// Supervisor procedure (includes admin)
-const supervisorProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== 'admin' && ctx.user.role !== 'supervisor' && ctx.user.role !== 'trainer') {
-    throw new TRPCError({ code: 'FORBIDDEN', message: 'Acceso denegado' });
-  }
-  return next({ ctx });
-});
+// Admin and supervisor procedures now use demo user
+const adminProcedure = demoUserProcedure;
+const supervisorProcedure = demoUserProcedure;
 
 export const appRouter = router({
   system: systemRouter,
@@ -40,7 +36,7 @@ export const appRouter = router({
 
   // Scenarios router
   scenarios: router({
-    list: protectedProcedure
+    list: demoUserProcedure
       .input(z.object({
         category: z.string().optional(),
         complexity: z.number().optional(),
@@ -73,7 +69,7 @@ export const appRouter = router({
         return result;
       }),
     
-    getById: protectedProcedure
+    getById: demoUserProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         const scenario = await db.getScenarioById(input.id);
@@ -83,13 +79,13 @@ export const appRouter = router({
         return scenario;
       }),
     
-    getByCategory: protectedProcedure
+    getByCategory: demoUserProcedure
       .input(z.object({ category: z.string() }))
       .query(async ({ input }) => {
         return await db.getScenariosByCategory(input.category);
       }),
     
-    getByComplexity: protectedProcedure
+    getByComplexity: demoUserProcedure
       .input(z.object({ complexity: z.number().min(1).max(5) }))
       .query(async ({ input }) => {
         return await db.getScenariosByComplexity(input.complexity);
@@ -126,13 +122,13 @@ export const appRouter = router({
 
   // Simulations router
   simulations: router({
-    mySimulations: protectedProcedure
+    mySimulations: demoUserProcedure
       .input(z.object({ limit: z.number().optional() }))
       .query(async ({ ctx, input }) => {
         return await db.getUserSimulations(ctx.user.id, input.limit);
       }),
     
-    getById: protectedProcedure
+    getById: demoUserProcedure
       .input(z.object({ id: z.number() }))
       .query(async ({ ctx, input }) => {
         const simulation = await db.getSimulationById(input.id);
@@ -148,7 +144,7 @@ export const appRouter = router({
         return simulation;
       }),
     
-    getMessages: protectedProcedure
+    getMessages: demoUserProcedure
       .input(z.object({ simulationId: z.number() }))
       .query(async ({ ctx, input }) => {
         const simulation = await db.getSimulationById(input.simulationId);
@@ -163,7 +159,7 @@ export const appRouter = router({
         return await db.getSimulationMessages(input.simulationId);
       }),
 
-    start: protectedProcedure
+    start: demoUserProcedure
       .input(z.object({ scenarioId: z.number() }))
       .mutation(async ({ ctx, input }) => {
         const database = await getDb();
@@ -183,7 +179,7 @@ export const appRouter = router({
         return { success: true, simulationId: 0 };
       }),
 
-    sendMessage: protectedProcedure
+    sendMessage: demoUserProcedure
       .input(z.object({
         simulationId: z.number(),
         content: z.string(),
@@ -236,7 +232,7 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    complete: protectedProcedure
+    complete: demoUserProcedure
       .input(z.object({
         simulationId: z.number(),
         audioBlob: z.string().optional(), // base64 encoded audio
@@ -344,26 +340,26 @@ export const appRouter = router({
 
   // User stats and profile
   user: router({
-    stats: protectedProcedure.query(async ({ ctx }) => {
+    stats: demoUserProcedure.query(async ({ ctx }) => {
       return await db.getUserStats(ctx.user.id);
     }),
     
-    profile: protectedProcedure.query(async ({ ctx }) => {
+    profile: demoUserProcedure.query(async ({ ctx }) => {
       return ctx.user;
     }),
     
-    badges: protectedProcedure.query(async ({ ctx }) => {
+    badges: demoUserProcedure.query(async ({ ctx }) => {
       return await db.getUserBadges(ctx.user.id);
     }),
   }),
 
   // Improvement plans
   improvementPlans: router({
-    myPlans: protectedProcedure.query(async ({ ctx }) => {
+    myPlans: demoUserProcedure.query(async ({ ctx }) => {
       return await db.getUserImprovementPlans(ctx.user.id);
     }),
     
-    activePlan: protectedProcedure.query(async ({ ctx }) => {
+    activePlan: demoUserProcedure.query(async ({ ctx }) => {
       return await db.getActiveImprovementPlan(ctx.user.id);
     }),
   }),
@@ -392,7 +388,7 @@ export const appRouter = router({
 
   // Audio Markers router (for supervisors to add temporal markers)
   audioMarkers: router({
-    list: protectedProcedure
+    list: demoUserProcedure
       .input(z.object({ simulationId: z.number() }))
       .query(async ({ input }) => {
         const database = await getDb();

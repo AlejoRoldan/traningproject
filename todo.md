@@ -177,3 +177,22 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Restricción: solo supervisores/trainers pueden agregar marcadores
 - [x] Tooltips con información del marcador al hacer hover
 - [x] Banderas de colores según categoría en la línea de tiempo
+
+## 🔧 Ajustes Solicitados
+
+- [ ] Eliminar panel de registro para acceso directo
+- [ ] Corregir error 404 en página principal
+- [ ] Verificar que todas las funcionalidades trabajen correctamente
+- [ ] Crear README.md detallado para GitHub
+- [ ] Documentar stack tecnológico completo
+- [ ] Incluir plan de escalamiento y producción
+- [ ] Crear repositorio en GitHub con todo el código
+
+## ✅ Ajustes Completados - Acceso Sin Autenticación
+
+- [x] Eliminar panel de registro para acceso directo
+- [x] Configurar usuario demo por defecto en frontend
+- [x] Convertir todos los procedimientos protegidos a públicos
+- [x] Crear usuario demo en backend (DEMO_USER)
+- [x] Eliminar validaciones de roles y permisos
+- [x] Verificar funcionamiento completo sin autenticación
