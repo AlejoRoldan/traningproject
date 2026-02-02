@@ -204,19 +204,17 @@ export default function Scenarios() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button className="flex-1" asChild>
-                        <Link href={`/simulation/start/${scenario.id}`}>
-                          <a className="flex items-center justify-center gap-2">
-                            <Play className="w-4 h-4" />
-                            Iniciar
-                          </a>
-                        </Link>
-                      </Button>
-                      <Button variant="outline" asChild>
-                        <Link href={`/scenarios/${scenario.id}`}>
-                          <a>Ver Detalles</a>
-                        </Link>
-                      </Button>
+                      <Link href={`/simulation/start/${scenario.id}`}>
+                        <Button className="flex-1 flex items-center justify-center gap-2">
+                          <Play className="w-4 h-4" />
+                          Iniciar
+                        </Button>
+                      </Link>
+                      <Link href={`/scenarios/${scenario.id}`}>
+                        <Button variant="outline">
+                          Ver Detalles
+                        </Button>
+                      </Link>
                     </div>
                   </CardContent>
                 </Card>

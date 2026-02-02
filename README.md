@@ -10,8 +10,8 @@ Desarrollada para Kaitel Paraguay, esta plataforma permite entrenar y evaluar a 
 
 ## ✨ Características Principales
 
-### 🎭 Simulaciones Progresivas de Llamadas
-La plataforma ofrece escenarios de entrenamiento organizados por complejidad, desde consultas informativas básicas hasta casos complejos de fraude, lavado de activos y robo. Cada simulación genera respuestas dinámicas del cliente usando GPT-4o, adaptándose al contexto y perfil del escenario.
+### 🎭 Simulaciones Progresivas de Llamadas con Voz Realista
+La plataforma ofrece escenarios de entrenamiento organizados por complejidad, desde consultas informativas básicas hasta casos complejos de fraude, lavado de activos y robo. Cada simulación genera respuestas dinámicas del cliente usando GPT-4o con **síntesis de voz realista** (OpenAI TTS), seleccionando automáticamente voces masculinas o femeninas según el perfil del cliente. El audio se reproduce automáticamente con indicador visual de "hablando".
 
 ### 🤖 Evaluación Automática con IA
 Integración completa con OpenAI GPT-4o para evaluar automáticamente el desempeño del agente en cinco dimensiones críticas: empatía, claridad, protocolo, resolución de problemas y generación de confianza. El sistema proporciona feedback personalizado con fortalezas, debilidades y recomendaciones específicas.
@@ -51,7 +51,7 @@ Diseño moderno y profesional siguiendo la identidad de marca de Itti Digital, c
 - **tRPC 11** para APIs type-safe end-to-end
 - **Drizzle ORM** para interacciones con base de datos
 - **MySQL/TiDB** para almacenamiento persistente
-- **OpenAI API** (GPT-4o + Whisper) para evaluación y transcripción
+- **OpenAI API** (GPT-4o + Whisper + TTS) para evaluación, transcripción y síntesis de voz
 
 ### Infraestructura
 - **AWS S3** para almacenamiento de grabaciones de audio

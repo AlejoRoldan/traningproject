@@ -213,3 +213,7 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Generar audio para cada respuesta del cliente
 - [x] Reproducir automáticamente en el frontend
 - [x] Agregar indicador visual cuando el cliente está "hablando"
+
+## 🐛 Error Reportado
+
+- [x] Corregir enlaces anidados en página /scenarios
