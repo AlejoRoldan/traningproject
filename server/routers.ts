@@ -267,8 +267,11 @@ export const appRouter = router({
         
         const duration = Math.floor((Date.now() - simulation.startedAt.getTime()) / 1000);
         
-        // Upload audio to S3 if provided
+        // Upload audio to S3 and analyze voice if provided
         let audioRecordingUrl: string | null = null;
+        let audioTranscript: string | null = null;
+        let voiceMetrics: string | null = null;
+        
         if (input.audioBlob) {
           try {
             const { storagePut } = await import('./storage');
@@ -276,6 +279,18 @@ export const appRouter = router({
             const audioKey = `simulations/${ctx.user.id}/${input.simulationId}-${Date.now()}.webm`;
             const { url } = await storagePut(audioKey, audioBuffer, 'audio/webm');
             audioRecordingUrl = url;
+            
+            // Analyze voice (transcription + sentiment + metrics)
+            try {
+              const { analyzeVoice } = await import('./voiceAnalysisService');
+              const voiceAnalysis = await analyzeVoice(url);
+              audioTranscript = voiceAnalysis.transcript;
+              voiceMetrics = JSON.stringify(voiceAnalysis.metrics);
+              console.log('[Simulation] Voice analysis completed. Overall voice score:', voiceAnalysis.metrics.overallVoiceScore);
+            } catch (voiceError) {
+              console.error('[Simulation] Voice analysis failed:', voiceError);
+              // Continue without voice analysis if it fails
+            }
           } catch (error) {
             console.error('Error uploading audio to S3:', error);
             // Continue without audio if upload fails
@@ -297,6 +312,8 @@ export const appRouter = router({
             pointsEarned: evaluation.pointsEarned,
             badgesEarned: JSON.stringify(evaluation.badgesEarned),
             audioRecordingUrl,
+            audioTranscript,
+            voiceMetrics,
           })
           .where(eq(simulations.id, input.simulationId));
 

@@ -123,3 +123,15 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Agregar reproductor de audio en detalle de simulación
 - [x] Indicador visual de grabación en simulación activa
 - [ ] (Opcional) Transcripción automática con Whisper API
+
+
+## 🎭 Análisis de Sentimiento y Métricas Vocales
+
+- [x] Actualizar esquema de BD con campos de métricas vocales
+- [x] Implementar transcripción automática con Whisper API
+- [x] Crear servicio de análisis de sentimiento del texto con LLM
+- [x] Analizar velocidad del habla y pausas desde segmentos de Whisper
+- [x] Detectar tono emocional (confianza, empatía, profesionalismo, claridad, entusiasmo)
+- [x] Integrar análisis en flujo de evaluación (completo con transcripción + análisis)
+- [x] Mostrar métricas vocales en UI de detalle de simulación
+- [x] Generar insights y recomendaciones personalizadas basadas en métricas
