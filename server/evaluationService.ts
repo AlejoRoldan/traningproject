@@ -1,4 +1,5 @@
 import { invokeLLM } from "./_core/llm";
+import { generateStructuredResponse, generateChatCompletion, type ChatMessage } from "./openaiService";
 import type { Scenario } from "../drizzle/schema";
 
 interface Message {
@@ -22,6 +23,9 @@ interface EvaluationResult {
   pointsEarned: number;
   badgesEarned: string[];
 }
+
+// Check if OpenAI API key is configured
+const useOpenAI = !!process.env.OPENAI_API_KEY;
 
 export async function evaluateSimulation(
   scenario: Scenario,
@@ -109,47 +113,87 @@ ${conversationTranscript}
 Evalúa el desempeño del agente basándote en la transcripción anterior y los criterios establecidos.`;
 
   try {
-    const response = await invokeLLM({
-      messages: [
+    let evaluationData;
+
+    if (useOpenAI) {
+      // Use OpenAI API
+      const messages: ChatMessage[] = [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "evaluation_result",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              empathy: { type: "number" },
-              clarity: { type: "number" },
-              protocol: { type: "number" },
-              resolution: { type: "number" },
-              confidence: { type: "number" },
-              feedback: { type: "string" },
-              strengths: {
-                type: "array",
-                items: { type: "string" }
-              },
-              weaknesses: {
-                type: "array",
-                items: { type: "string" }
-              },
-              recommendations: {
-                type: "array",
-                items: { type: "string" }
-              }
+      ];
+
+      evaluationData = await generateStructuredResponse(messages, {
+        name: "evaluation_result",
+        schema: {
+          type: "object",
+          properties: {
+            empathy: { type: "number" },
+            clarity: { type: "number" },
+            protocol: { type: "number" },
+            resolution: { type: "number" },
+            confidence: { type: "number" },
+            feedback: { type: "string" },
+            strengths: {
+              type: "array",
+              items: { type: "string" }
             },
-            required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
-            additionalProperties: false
+            weaknesses: {
+              type: "array",
+              items: { type: "string" }
+            },
+            recommendations: {
+              type: "array",
+              items: { type: "string" }
+            }
+          },
+          required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
+          additionalProperties: false
+        }
+      });
+    } else {
+      // Use Manus built-in LLM
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "evaluation_result",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                empathy: { type: "number" },
+                clarity: { type: "number" },
+                protocol: { type: "number" },
+                resolution: { type: "number" },
+                confidence: { type: "number" },
+                feedback: { type: "string" },
+                strengths: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                weaknesses: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                recommendations: {
+                  type: "array",
+                  items: { type: "string" }
+                }
+              },
+              required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
+              additionalProperties: false
+            }
           }
         }
-      }
-    });
+      });
 
-    const content = response.choices[0].message.content;
-    const evaluationData = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
+      const content = response.choices[0].message.content;
+      evaluationData = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
+    }
 
     // Calculate weighted overall score
     const weights = {
@@ -256,15 +300,34 @@ ${conversationTranscript}
 Responde como el cliente. Tu respuesta:`;
 
   try {
-    const response = await invokeLLM({
-      messages: [
+    let responseText: string;
+
+    if (useOpenAI) {
+      // Use OpenAI API
+      const messages: ChatMessage[] = [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
-      ]
-    });
+      ];
 
-    const content = response.choices[0].message.content;
-    return (typeof content === 'string' ? content : JSON.stringify(content)).trim();
+      responseText = await generateChatCompletion(messages, {
+        model: 'gpt-4o',
+        temperature: 0.8,
+        maxTokens: 150
+      });
+    } else {
+      // Use Manus built-in LLM
+      const response = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ]
+      });
+
+      const content = response.choices[0].message.content;
+      responseText = (typeof content === 'string' ? content : JSON.stringify(content)).trim();
+    }
+
+    return responseText.trim();
     
   } catch (error) {
     console.error("Error generando respuesta del cliente:", error);

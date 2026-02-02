@@ -97,3 +97,12 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Corregir enlaces anidados en TrainingDashboardLayout
 - [x] Corregir query improvementPlans.activePlan que retorna undefined (ahora retorna null)
 - [x] Asegurar que todas las queries retornen valores válidos
+
+
+## 🔌 Integración de OpenAI API
+
+- [x] Configurar API key de OpenAI de forma segura (via Settings → Secrets)
+- [x] Actualizar servicio de evaluación para usar OpenAI directamente
+- [x] Sistema híbrido: usa OpenAI si está configurada, sino usa Manus LLM
+- [ ] Usuario debe ingresar API key válida en Settings → Secrets
+- [ ] Probar simulaciones con API real una vez configurada
