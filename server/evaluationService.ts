@@ -204,12 +204,19 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
       confidence: 0.20 // Fixed 20% weight
     };
 
+    // Ensure all values are valid numbers
+    const empathy = Number(evaluationData.empathy) || 75;
+    const clarity = Number(evaluationData.clarity) || 75;
+    const protocol = Number(evaluationData.protocol) || 75;
+    const resolution = Number(evaluationData.resolution) || 75;
+    const confidence = Number(evaluationData.confidence) || 75;
+
     const overallScore = Math.round(
-      evaluationData.empathy * weights.empathy +
-      evaluationData.clarity * weights.clarity +
-      evaluationData.protocol * weights.protocol +
-      evaluationData.resolution * weights.resolution +
-      evaluationData.confidence * weights.confidence
+      empathy * weights.empathy +
+      clarity * weights.clarity +
+      protocol * weights.protocol +
+      resolution * weights.resolution +
+      confidence * weights.confidence
     );
 
     // Calculate points earned based on score and complexity
@@ -228,11 +235,11 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
     return {
       overallScore,
       categoryScores: {
-        empathy: Math.round(evaluationData.empathy),
-        clarity: Math.round(evaluationData.clarity),
-        protocol: Math.round(evaluationData.protocol),
-        resolution: Math.round(evaluationData.resolution),
-        confidence: Math.round(evaluationData.confidence)
+        empathy: Math.round(empathy),
+        clarity: Math.round(clarity),
+        protocol: Math.round(protocol),
+        resolution: Math.round(resolution),
+        confidence: Math.round(confidence)
       },
       feedback: evaluationData.feedback,
       strengths: evaluationData.strengths,
