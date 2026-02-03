@@ -1,0 +1,202 @@
+{
+  "query": "SELECT id, title, category, complexity FROM scenarios ORDER BY category, complexity;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3irpNWmUc4ctRuT.6a7388c9cb8f --database 9y9hjjz29oG5PHr9mg6PsX --execute SELECT id, title, category, complexity FROM scenarios ORDER BY category, complexity;",
+  "rows": [
+    {
+      "id": "1",
+      "title": "Consulta de Saldo - Nivel Básico",
+      "category": "informative",
+      "complexity": "1"
+    },
+    {
+      "id": "30001",
+      "title": "Consulta de Saldo y Movimientos",
+      "category": "informative",
+      "complexity": "1"
+    },
+    {
+      "id": "30002",
+      "title": "Información sobre Tarjeta de Crédito",
+      "category": "informative",
+      "complexity": "2"
+    },
+    {
+      "id": "30003",
+      "title": "Consulta de Requisitos para Préstamo Personal",
+      "category": "informative",
+      "complexity": "2"
+    },
+    {
+      "id": "30005",
+      "title": "Activación de Tarjeta de Débito Nueva",
+      "category": "transactional",
+      "complexity": "1"
+    },
+    {
+      "id": "2",
+      "title": "Bloqueo de Tarjeta por Pérdida",
+      "category": "transactional",
+      "complexity": "2"
+    },
+    {
+      "id": "30004",
+      "title": "Transferencia Nacional Urgente",
+      "category": "transactional",
+      "complexity": "2"
+    },
+    {
+      "id": "30006",
+      "title": "Cambio de Límite de Tarjeta de Crédito",
+      "category": "transactional",
+      "complexity": "3"
+    },
+    {
+      "id": "30008",
+      "title": "Llamada Sospechosa Solicitando Datos",
+      "category": "fraud",
+      "complexity": "3"
+    },
+    {
+      "id": "30009",
+      "title": "Retiro No Autorizado en Cajero",
+      "category": "fraud",
+      "complexity": "4"
+    },
+    {
+      "id": "30007",
+      "title": "Compras No Reconocidas en Tarjeta",
+      "category": "fraud",
+      "complexity": "4"
+    },
+    {
+      "id": "3",
+      "title": "Reporte de Transacción Fraudulenta",
+      "category": "fraud",
+      "complexity": "4"
+    },
+    {
+      "id": "30010",
+      "title": "Depósitos Frecuentes en Efectivo",
+      "category": "money_laundering",
+      "complexity": "5"
+    },
+    {
+      "id": "30012",
+      "title": "Estructuración de Transacciones (Smurfing)",
+      "category": "money_laundering",
+      "complexity": "5"
+    },
+    {
+      "id": "30011",
+      "title": "Transferencias Internacionales Inusuales",
+      "category": "money_laundering",
+      "complexity": "5"
+    },
+    {
+      "id": "4",
+      "title": "Sospecha de Lavado de Activos",
+      "category": "money_laundering",
+      "complexity": "5"
+    },
+    {
+      "id": "30015",
+      "title": "Robo de Tarjeta en Cajero Automático",
+      "category": "theft",
+      "complexity": "3"
+    },
+    {
+      "id": "30013",
+      "title": "Robo de Celular con Banca Móvil",
+      "category": "theft",
+      "complexity": "4"
+    },
+    {
+      "id": "30014",
+      "title": "Robo de Chequera y Documentos",
+      "category": "theft",
+      "complexity": "4"
+    },
+    {
+      "id": "8",
+      "title": "Robo de Identidad Reportado",
+      "category": "theft",
+      "complexity": "5"
+    },
+    {
+      "id": "30018",
+      "title": "Mal Servicio en Sucursal",
+      "category": "complaint",
+      "complexity": "2"
+    },
+    {
+      "id": "30017",
+      "title": "Demora en Acreditación de Depósito",
+      "category": "complaint",
+      "complexity": "3"
+    },
+    {
+      "id": "30016",
+      "title": "Cobro Indebido de Comisión",
+      "category": "complaint",
+      "complexity": "3"
+    },
+    {
+      "id": "6",
+      "title": "Reclamo por Cargo Incorrecto",
+      "category": "complaint",
+      "complexity": "3"
+    },
+    {
+      "id": "30020",
+      "title": "Consulta de Historial Crediticio",
+      "category": "credit",
+      "complexity": "2"
+    },
+    {
+      "id": "5",
+      "title": "Solicitud de Crédito Personal",
+      "category": "credit",
+      "complexity": "3"
+    },
+    {
+      "id": "30021",
+      "title": "Pago Anticipado de Préstamo",
+      "category": "credit",
+      "complexity": "3"
+    },
+    {
+      "id": "30019",
+      "title": "Refinanciación de Préstamo Personal",
+      "category": "credit",
+      "complexity": "4"
+    },
+    {
+      "id": "7",
+      "title": "Asistencia con Banca Digital",
+      "category": "digital_channels",
+      "complexity": "2"
+    },
+    {
+      "id": "30022",
+      "title": "Problemas con Banca Móvil - No Carga",
+      "category": "digital_channels",
+      "complexity": "2"
+    },
+    {
+      "id": "30023",
+      "title": "Registro en Banca por Internet",
+      "category": "digital_channels",
+      "complexity": "2"
+    },
+    {
+      "id": "30024",
+      "title": "Token Digital No Funciona",
+      "category": "digital_channels",
+      "complexity": "3"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\ttitle\tcategory\tcomplexity\n1\tConsulta de Saldo - Nivel Básico\tinformative\t1\n30001\tConsulta de Saldo y Movimientos\tinformative\t1\n30002\tInformación sobre Tarjeta de Crédito\tinformative\t2\n30003\tConsulta de Requisitos para Préstamo Personal\tinformative\t2\n30005\tActivación de Tarjeta de Débito Nueva\ttransactional\t1\n2\tBloqueo de Tarjeta por Pérdida\ttransactional\t2\n30004\tTransferencia Nacional Urgente\ttransactional\t2\n30006\tCambio de Límite de Tarjeta de Crédito\ttransactional\t3\n30008\tLlamada Sospechosa Solicitando Datos\tfraud\t3\n30009\tRetiro No Autorizado en Cajero\tfraud\t4\n30007\tCompras No Reconocidas en Tarjeta\tfraud\t4\n3\tReporte de Transacción Fraudulenta\tfraud\t4\n30010\tDepósitos Frecuentes en Efectivo\tmoney_laundering\t5\n30012\tEstructuración de Transacciones (Smurfing)\tmoney_laundering\t5\n30011\tTransferencias Internacionales Inusuales\tmoney_laundering\t5\n4\tSospecha de Lavado de Activos\tmoney_laundering\t5\n30015\tRobo de Tarjeta en Cajero Automático\ttheft\t3\n30013\tRobo de Celular con Banca Móvil\ttheft\t4\n30014\tRobo de Chequera y Documentos\ttheft\t4\n8\tRobo de Identidad Reportado\ttheft\t5\n30018\tMal Servicio en Sucursal\tcomplaint\t2\n30017\tDemora en Acreditación de Depósito\tcomplaint\t3\n30016\tCobro Indebido de Comisión\tcomplaint\t3\n6\tReclamo por Cargo Incorrecto\tcomplaint\t3\n30020\tConsulta de Historial Crediticio\tcredit\t2\n5\tSolicitud de Crédito Personal\tcredit\t3\n30021\tPago Anticipado de Préstamo\tcredit\t3\n30019\tRefinanciación de Préstamo Personal\tcredit\t4\n7\tAsistencia con Banca Digital\tdigital_channels\t2\n30022\tProblemas con Banca Móvil - No Carga\tdigital_channels\t2\n30023\tRegistro en Banca por Internet\tdigital_channels\t2\n30024\tToken Digital No Funciona\tdigital_channels\t3\n",
+  "stderr": "",
+  "execution_time_ms": 51
+}
