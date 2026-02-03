@@ -184,3 +184,29 @@ export const teamStats = mysqlTable("team_stats", {
 
 export type TeamStat = typeof teamStats.$inferSelect;
 export type InsertTeamStat = typeof teamStats.$inferInsert;
+
+// Response templates table - Model responses for training
+export const responseTemplates = mysqlTable("response_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  category: mysqlEnum("category", [
+    "informative",
+    "transactional",
+    "fraud",
+    "money_laundering",
+    "theft",
+    "complaint",
+    "credit",
+    "digital_channels"
+  ]).notNull(),
+  type: mysqlEnum("type", ["opening", "development", "objection_handling", "closing", "empathy", "protocol"]).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  content: text("content").notNull(),
+  context: text("context"), // When to use this response
+  tags: text("tags"), // JSON array
+  complexity: int("complexity").notNull(), // 1-5, matching scenario complexity
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ResponseTemplate = typeof responseTemplates.$inferSelect;
+export type InsertResponseTemplate = typeof responseTemplates.$inferInsert;

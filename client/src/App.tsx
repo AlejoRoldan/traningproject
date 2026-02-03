@@ -12,6 +12,7 @@ import SimulationDetail from "./pages/SimulationDetail";
 import Progress from "./pages/Progress";
 import Gamification from "./pages/Gamification";
 import Team from "./pages/Team";
+import ResponseLibrary from "./pages/ResponseLibrary";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/progress" component={Progress} />
       <Route path="/gamification" component={Gamification} />
       <Route path="/team" component={Team} />
+      <Route path="/response-library" component={ResponseLibrary} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -10,7 +10,8 @@ import {
   Settings, 
   LogOut,
   Trophy,
-  BarChart3
+  BarChart3,
+  Library
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -27,6 +28,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Escenarios", href: "/scenarios", icon: BookOpen },
   { label: "Mis Simulaciones", href: "/simulations", icon: Target },
+  { label: "Biblioteca", href: "/response-library", icon: Library },
   { label: "Mi Progreso", href: "/progress", icon: TrendingUp },
   { label: "Gamificación", href: "/gamification", icon: Trophy },
   { label: "Mi Equipo", href: "/team", icon: Users },

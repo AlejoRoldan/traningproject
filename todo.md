@@ -244,3 +244,15 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [ ] Agregar botón "Reiniciar Conversación" en modo práctica
 - [ ] Actualizar página de resultados para modo práctica (sin puntuación)
 - [ ] Excluir simulaciones de práctica de estadísticas y progreso
+
+
+## 📚 Biblioteca de Respuestas Modelo
+
+- [x] Crear tabla response_templates en base de datos
+- [x] Poblar base de datos con respuestas modelo por categoría (21 respuestas)
+- [x] Crear endpoint backend para obtener respuestas por categoría
+- [x] Diseñar página de Biblioteca de Respuestas
+- [x] Implementar filtros por categoría y tipo de respuesta
+- [x] Agregar botón de acceso rápido en interfaz de simulación
+- [x] Agregar enlace en menú de navegación
+- [x] Incluir ejemplos de: apertura, desarrollo, cierre, manejo de objeciones

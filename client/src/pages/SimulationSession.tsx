@@ -18,7 +18,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
-  Mic
+  Mic,
+  Library
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -377,6 +378,15 @@ export default function SimulationSession() {
               <Badge variant="outline" className="text-sm">
                 Nivel {scenario.complexity}
               </Badge>
+
+              <Button 
+                variant="outline" 
+                onClick={() => window.open('/response-library', '_blank')}
+                size="sm"
+              >
+                <Library className="w-4 h-4 mr-2" />
+                Biblioteca
+              </Button>
 
               {!isCompleted && (
                 <Button 

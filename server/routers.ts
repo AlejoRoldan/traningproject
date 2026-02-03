@@ -11,7 +11,7 @@ import { generateSpeech, detectGenderFromProfile } from "./ttsService";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { getDb } from "./db";
-import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers } from "../drizzle/schema";
+import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates } from "../drizzle/schema";
 import { eq, desc } from "drizzle-orm";
 
 // Demo user procedure (no authentication required)
@@ -556,6 +556,58 @@ export const appRouter = router({
         await database.delete(audioMarkers).where(eq(audioMarkers.id, input.id));
         
         return { success: true };
+      }),
+  }),
+
+  // Response templates router
+  responseTemplates: router({
+    list: demoUserProcedure
+      .input(z.object({
+        category: z.enum(['informative', 'transactional', 'fraud', 'money_laundering', 'theft', 'complaint', 'credit', 'digital_channels']).optional(),
+        type: z.enum(['opening', 'development', 'objection_handling', 'closing', 'empathy', 'protocol']).optional(),
+        complexity: z.number().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        let query = database.select().from(responseTemplates);
+        
+        if (input?.category) {
+          query = query.where(eq(responseTemplates.category, input.category)) as any;
+        }
+        
+        const results = await query;
+        
+        // Filter by type and complexity in memory (simpler than complex SQL)
+        let filtered = results;
+        if (input?.type) {
+          filtered = filtered.filter(r => r.type === input.type);
+        }
+        if (input?.complexity) {
+          filtered = filtered.filter(r => r.complexity === input.complexity);
+        }
+        
+        return filtered;
+      }),
+
+    getById: demoUserProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'Database not available' });
+        
+        const [template] = await database
+          .select()
+          .from(responseTemplates)
+          .where(eq(responseTemplates.id, input.id))
+          .limit(1);
+        
+        if (!template) {
+          throw new TRPCError({ code: 'NOT_FOUND', message: 'Respuesta modelo no encontrada' });
+        }
+        
+        return template;
       }),
   }),
 });
