@@ -206,9 +206,10 @@ export default function SimulationSession() {
   const handleSendMessage = async () => {
     if (!inputMessage.trim() || !simulationId || isCompleted) return;
 
+    const messageContent = inputMessage.trim();
     const userMessage: Message = {
       role: "agent",
-      content: inputMessage,
+      content: messageContent,
       timestamp: new Date()
     };
 
@@ -217,7 +218,7 @@ export default function SimulationSession() {
 
     // Send to backend and get GPT response
     sendMessageMutation.mutate(
-      { simulationId, content: inputMessage },
+      { simulationId, content: messageContent },
       {
         onSuccess: (data) => {
           // Add client response from GPT
@@ -465,6 +466,7 @@ export default function SimulationSession() {
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
+                        e.stopPropagation();
                         handleSendMessage();
                       }
                     }}

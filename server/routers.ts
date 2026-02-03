@@ -173,13 +173,13 @@ export const appRouter = router({
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Escenario no encontrado' });
         }
         
-        const result = await database.insert(simulations).values({
+        const [result] = await database.insert(simulations).values({
           userId: ctx.user.id,
           scenarioId: input.scenarioId,
           status: 'in_progress',
-        });
+        }).$returningId();
         
-        return { success: true, simulationId: 0 };
+        return { success: true, simulationId: result.id };
       }),
 
     sendMessage: demoUserProcedure
