@@ -163,7 +163,10 @@ export const appRouter = router({
       }),
 
     start: demoUserProcedure
-      .input(z.object({ scenarioId: z.number() }))
+      .input(z.object({ 
+        scenarioId: z.number(),
+        isPracticeMode: z.boolean().optional().default(false)
+      }))
       .mutation(async ({ ctx, input }) => {
         const database = await getDb();
         if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
@@ -176,10 +179,11 @@ export const appRouter = router({
         const [result] = await database.insert(simulations).values({
           userId: ctx.user.id,
           scenarioId: input.scenarioId,
+          isPracticeMode: input.isPracticeMode ? 1 : 0,
           status: 'in_progress',
         }).$returningId();
         
-        return { success: true, simulationId: result.id };
+        return { success: true, simulationId: result.id, isPracticeMode: input.isPracticeMode };
       }),
 
     sendMessage: demoUserProcedure
@@ -292,7 +296,7 @@ export const appRouter = router({
           throw new TRPCError({ code: 'FORBIDDEN' });
         }
         
-        // Get scenario and messages for evaluation
+        // Get scenario and messages
         const scenario = await db.getScenarioById(simulation.scenarioId);
         if (!scenario) {
           throw new TRPCError({ code: 'NOT_FOUND', message: 'Escenario no encontrado' });
@@ -304,8 +308,9 @@ export const appRouter = router({
           content: m.content
         }));
 
-        // Evaluate with GPT
-        const evaluation = await evaluateSimulation(scenario, messagesForEvaluation as any);
+        // Evaluate with GPT only if not in practice mode
+        const isPracticeMode = simulation.isPracticeMode === 1;
+        const evaluation = isPracticeMode ? null : await evaluateSimulation(scenario, messagesForEvaluation as any);
         
         const duration = Math.floor((Date.now() - simulation.startedAt.getTime()) / 1000);
         
@@ -343,44 +348,66 @@ export const appRouter = router({
           }
         }
         
-        // Update simulation with evaluation results
-        await database.update(simulations)
-          .set({
-            status: 'completed',
-            completedAt: new Date(),
-            duration,
-            overallScore: evaluation.overallScore,
-            categoryScores: JSON.stringify(evaluation.categoryScores),
-            feedback: evaluation.feedback,
-            strengths: JSON.stringify(evaluation.strengths),
-            weaknesses: JSON.stringify(evaluation.weaknesses),
-            recommendations: JSON.stringify(evaluation.recommendations),
-            pointsEarned: evaluation.pointsEarned,
-            badgesEarned: JSON.stringify(evaluation.badgesEarned),
-            audioRecordingUrl,
-            audioTranscript,
-            transcriptSegments,
-            transcriptKeywords,
-            voiceMetrics,
-          })
-          .where(eq(simulations.id, input.simulationId));
+        // Update simulation with evaluation results (or just mark as completed for practice mode)
+        if (isPracticeMode) {
+          // Practice mode: just mark as completed, no evaluation
+          await database.update(simulations)
+            .set({
+              status: 'completed',
+              completedAt: new Date(),
+              duration,
+              audioRecordingUrl,
+              audioTranscript,
+              transcriptSegments,
+              transcriptKeywords,
+              voiceMetrics,
+            })
+            .where(eq(simulations.id, input.simulationId));
+          
+          return { 
+            success: true, 
+            isPracticeMode: true
+          };
+        } else {
+          // Normal mode: full evaluation
+          await database.update(simulations)
+            .set({
+              status: 'completed',
+              completedAt: new Date(),
+              duration,
+              overallScore: evaluation!.overallScore,
+              categoryScores: JSON.stringify(evaluation!.categoryScores),
+              feedback: evaluation!.feedback,
+              strengths: JSON.stringify(evaluation!.strengths),
+              weaknesses: JSON.stringify(evaluation!.weaknesses),
+              recommendations: JSON.stringify(evaluation!.recommendations),
+              pointsEarned: evaluation!.pointsEarned,
+              badgesEarned: JSON.stringify(evaluation!.badgesEarned),
+              audioRecordingUrl,
+              audioTranscript,
+              transcriptSegments,
+              transcriptKeywords,
+              voiceMetrics,
+            })
+            .where(eq(simulations.id, input.simulationId));
 
-        // Update user points
-        const { users } = await import('../drizzle/schema');
-        await database.update(users)
-          .set({
-            points: ctx.user.points + evaluation.pointsEarned
-          })
-          .where(eq(users.id, ctx.user.id));
-        
-        return { 
-          success: true, 
-          evaluation: {
-            overallScore: evaluation.overallScore,
-            pointsEarned: evaluation.pointsEarned,
-            badgesEarned: evaluation.badgesEarned
-          }
-        };
+          // Update user points
+          const { users } = await import('../drizzle/schema');
+          await database.update(users)
+            .set({
+              points: ctx.user.points + evaluation!.pointsEarned
+            })
+            .where(eq(users.id, ctx.user.id));
+          
+          return { 
+            success: true, 
+            evaluation: {
+              overallScore: evaluation!.overallScore,
+              pointsEarned: evaluation!.pointsEarned,
+              badgesEarned: evaluation!.badgesEarned
+            }
+          };
+        }
       }),
   }),
 

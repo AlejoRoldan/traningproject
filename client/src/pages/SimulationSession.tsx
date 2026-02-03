@@ -34,6 +34,10 @@ export default function SimulationSession() {
   const [, navigate] = useLocation();
   const scenarioId = params.scenarioId ? parseInt(params.scenarioId) : null;
   
+  // Check if practice mode from query params
+  const searchParams = new URLSearchParams(window.location.search);
+  const isPracticeMode = searchParams.get('practice') === 'true';
+  
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [simulationId, setSimulationId] = useState<number | null>(null);
@@ -68,7 +72,7 @@ export default function SimulationSession() {
   useEffect(() => {
     if (scenarioId && !simulationId) {
       startSimulationMutation.mutate(
-        { scenarioId },
+        { scenarioId, isPracticeMode },
         {
           onSuccess: (data) => {
             setSimulationId(data.simulationId);
@@ -285,10 +289,16 @@ export default function SimulationSession() {
         onSuccess: (data) => {
           setIsCompleted(true);
           setIsEvaluating(false);
-          toast.success(`¡Simulación completada! Puntuación: ${data.evaluation.overallScore}%`);
-          if (data.evaluation.pointsEarned > 0) {
-            toast.success(`+${data.evaluation.pointsEarned} puntos ganados`);
+          
+          if (data.isPracticeMode) {
+            toast.success('¡Práctica completada! No se generó evaluación.');
+          } else if (data.evaluation) {
+            toast.success(`¡Simulación completada! Puntuación: ${data.evaluation.overallScore}%`);
+            if (data.evaluation.pointsEarned > 0) {
+              toast.success(`+${data.evaluation.pointsEarned} puntos ganados`);
+            }
           }
+          
           setTimeout(() => {
             navigate(`/simulations/${simulationId}`);
           }, 2000);
@@ -339,7 +349,14 @@ export default function SimulationSession() {
           <div className="container flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-foreground">{scenario.title}</h1>
-              <p className="text-sm text-muted-foreground">Simulación en curso</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-muted-foreground">Simulación en curso</p>
+                {isPracticeMode && (
+                  <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">
+                    Modo Práctica
+                  </Badge>
+                )}
+              </div>
             </div>
             
             <div className="flex items-center gap-6">

@@ -61,6 +61,7 @@ export const simulations = mysqlTable("simulations", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   scenarioId: int("scenarioId").notNull(),
+  isPracticeMode: int("isPracticeMode").default(0).notNull(), // boolean: 1 = practice (no evaluation), 0 = normal
   status: mysqlEnum("status", ["in_progress", "completed", "abandoned"]).default("in_progress").notNull(),
   startedAt: timestamp("startedAt").defaultNow().notNull(),
   completedAt: timestamp("completedAt"),

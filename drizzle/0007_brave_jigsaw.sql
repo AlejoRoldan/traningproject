@@ -1,0 +1,1 @@
+ALTER TABLE `simulations` ADD `isPracticeMode` int DEFAULT 0 NOT NULL;

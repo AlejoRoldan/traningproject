@@ -232,3 +232,15 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Mejorar UI con controles de voz (botón micrófono, indicadores)
 - [x] Alternar entre modo texto y modo voz
 - [x] Mostrar transcripción en tiempo real
+
+
+## 🎯 Modo Práctica Libre (Sin Evaluación)
+
+- [x] Agregar campo isPracticeMode a tabla simulations
+- [x] Modificar mutación startSimulation para aceptar parámetro isPracticeMode
+- [x] Actualizar lógica de finalización para omitir evaluación en modo práctica
+- [x] Agregar toggle "Modo Práctica" en interfaz de escenarios
+- [x] Modificar SimulationSession para mostrar indicador de modo práctica
+- [ ] Agregar botón "Reiniciar Conversación" en modo práctica
+- [ ] Actualizar página de resultados para modo práctica (sin puntuación)
+- [ ] Excluir simulaciones de práctica de estadísticas y progreso
