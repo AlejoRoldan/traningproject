@@ -421,4 +421,11 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 
 - [x] Configurar Vite HMR para entorno de desarrollo Manus
 - [x] Actualizar vite.config.ts con configuración de WebSocket
+- [x] Ajustar configuración de host para WebSocket
 - [x] Verificar que no haya errores de conexión en consola
+
+## 📝 Mejoras de UX en Coaching
+
+- [x] Mejorar manejo de error cuando no hay suficientes simulaciones
+- [x] Mostrar mensaje amigable en lugar de error en consola
+- [x] Agregar enlace directo a escenarios desde mensaje de error

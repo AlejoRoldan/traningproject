@@ -45,6 +45,10 @@ export default function Coaching() {
   const generatePlan = trpc.coaching.generatePlan.useMutation({
     onSuccess: () => {
       utils.coaching.getActivePlan.invalidate();
+    },
+    onError: (error) => {
+      // Error is already shown in the UI, no need to log
+      console.error('Error generating plan:', error.message);
     }
   });
   
@@ -145,7 +149,15 @@ export default function Coaching() {
               Completa al menos 3 simulaciones para que la IA pueda analizar tu desempeño y generar un plan personalizado
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
+          <CardContent className="text-center space-y-4">
+            {generatePlan.isError && (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  <AlertCircle className="inline h-4 w-4 mr-2" />
+                  {generatePlan.error.message}
+                </p>
+              </div>
+            )}
             <Link href="/scenarios">
               <Button variant="outline">
                 Ir a Escenarios
