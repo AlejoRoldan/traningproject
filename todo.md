@@ -286,3 +286,132 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Corregir validación de números en evaluationService.ts
 - [x] Normalizar pesos para que sumen 1.0
 - [x] Agregar validación Number.isFinite() para prevenir NaN
+
+
+## 🤖 Sistema de Coaching Inteligente con IA
+
+### Base de Datos y Arquitectura
+- [ ] Crear tabla `coaching_plans` (planes de mejora personalizados)
+- [ ] Crear tabla `coaching_alerts` (alertas a supervisores)
+- [ ] Crear tabla `buddy_pairs` (emparejamiento de agentes)
+- [ ] Crear tabla `micro_learning_content` (videos y recursos)
+- [ ] Diseñar arquitectura de análisis de desempeño
+
+### Motor de Análisis y Generación de Planes
+- [ ] Implementar análisis de tendencias de desempeño por agente
+- [ ] Crear servicio de generación de planes con IA (GPT-4o)
+- [ ] Implementar detección de debilidades por categoría
+- [ ] Crear recomendador de escenarios basado en gaps
+- [ ] Implementar cálculo de prioridades de mejora
+
+### Sistema de Alertas Automáticas
+- [ ] Implementar detector de 3+ simulaciones consecutivas <60%
+- [ ] Crear sistema de notificaciones a supervisores
+- [ ] Implementar alertas por estancamiento (sin mejora en 2 semanas)
+- [ ] Crear dashboard de alertas para supervisores
+
+### Buddy System
+- [ ] Implementar algoritmo de matching por fortalezas complementarias
+- [ ] Crear sugerencias de buddy pairs
+- [ ] Implementar sistema de aceptación/rechazo de buddies
+- [ ] Crear interfaz de comunicación entre buddies
+
+### Interfaz de Usuario
+- [ ] Crear página "Mi Plan de Coaching" para agentes
+- [ ] Crear dashboard de coaching para supervisores
+- [ ] Implementar vista de progreso de plan
+- [ ] Crear sección de micro-learning integrada
+- [ ] Implementar notificaciones en tiempo real
+
+### Micro-Learning
+- [ ] Diseñar estructura de contenido de micro-learning
+- [ ] Crear biblioteca inicial de videos/recursos
+- [ ] Implementar recomendaciones automáticas de contenido
+- [ ] Crear sistema de tracking de contenido consumido
+
+
+## 🤖 Sistema de Coaching Inteligente con IA (Prioridad 3)
+
+### ✅ Completado
+
+- [x] Diseñar arquitectura del sistema de coaching
+- [x] Crear esquema de base de datos (coaching_plans, coaching_alerts, buddy_pairs, microlearning_content)
+- [x] Implementar motor de análisis de desempeño (analyzeAgentPerformance)
+- [x] Crear generación de planes con IA (generateCoachingPlan)
+- [x] Implementar sistema de alertas automáticas (AlertService)
+- [x] Integrar detección de alertas en flujo de simulación
+- [x] Crear algoritmo de matching para buddy system (findBuddyCandidates)
+- [x] Implementar gestión de buddy pairs (create, get, update, end)
+- [x] Crear endpoints tRPC para coaching (generatePlan, getActivePlan, updateProgress)
+- [x] Crear endpoints tRPC para alertas (getAlerts, acknowledgeAlert, resolveAlert)
+- [x] Crear endpoints tRPC para buddy system (findBuddyCandidates, createBuddyPair, getBuddyPair, updateBuddyGoal, endBuddyPair)
+- [x] Diseñar e implementar interfaz de coaching (/coaching)
+- [x] Implementar vista de plan de mejora con progreso
+- [x] Implementar vista de buddy system con matching
+- [x] Implementar vista de alertas para agentes
+- [x] Agregar enlace "Coaching IA" en menú de navegación
+
+### 🎯 Funcionalidades Implementadas
+
+**Motor de Análisis:**
+- Analiza últimas 10 simulaciones del agente
+- Calcula promedios por categoría de habilidad
+- Detecta debilidades (score < 70) con prioridad (alta/media/baja)
+- Identifica fortalezas (score >= 75) con consistencia
+- Calcula tendencias (mejorando/estable/declinando)
+
+**Generación de Planes con IA:**
+- GPT-4o analiza debilidades y fortalezas
+- Genera áreas prioritarias (máximo 3)
+- Define objetivo semanal alcanzable
+- Estima tiempo de mejora (1-8 semanas)
+- Recomienda escenarios específicos según debilidades
+- Tracking automático de progreso
+
+**Sistema de Alertas Automáticas:**
+- Detección de bajo rendimiento (3+ simulaciones consecutivas <60%)
+- Detección de estancamiento (sin mejora en 5 simulaciones)
+- Alertas de mejora significativa (+15% en categoría)
+- Notificación de hitos (100% plan completado)
+- Filtrado por estado (pending/acknowledged/resolved)
+- Filtrado por tipo de alerta
+
+**Buddy System Inteligente:**
+- Matching basado en habilidades complementarias
+- Score de compatibilidad (0-100)
+- Razones específicas del match
+- Gestión de objetivos compartidos
+- Prevención de emparejamientos duplicados
+- Top 5 candidatos ordenados por compatibilidad
+
+**Interfaz de Usuario:**
+- Dashboard de coaching con 3 tabs (Plan/Buddy/Alertas)
+- Visualización de progreso con barra y métricas
+- Cards de debilidades con prioridad y tendencia
+- Cards de fortalezas con consistencia
+- Dialog de selección de buddy con candidatos
+- Lista de alertas con categorización
+- Badges de estado y prioridad
+- Integración completa con sistema de navegación
+
+### 📊 Criterios de Matching de Buddy
+
+1. **Complementariedad de Habilidades (30 pts):** Fortaleza del buddy coincide con debilidad del agente
+2. **Ayuda Mutua (20 pts):** Agente puede ayudar al buddy en sus debilidades
+3. **Beneficio Mutuo (20 pts bonus):** Ambos pueden ayudarse mutuamente
+4. **Mínimo 3 simulaciones:** Solo agentes con suficiente data
+
+### 🔔 Tipos de Alertas
+
+- **low_performance:** 3+ simulaciones consecutivas <60%
+- **stagnation:** Sin mejora en 5 simulaciones
+- **improvement:** Mejora de +15% en alguna categoría
+- **milestone:** 100% del plan de coaching completado
+
+### 🎓 Microlearning (Pendiente)
+
+- [ ] Seed contenido inicial (videos/artículos por categoría)
+- [ ] Crear endpoints de microlearning
+- [ ] Integrar recomendaciones en plan de coaching
+- [ ] Tracking de contenido completado
+

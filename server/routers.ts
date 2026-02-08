@@ -12,7 +12,7 @@ import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates } from "../drizzle/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 // Demo user procedure (no authentication required)
 const demoUserProcedure = publicProcedure.use(({ ctx, next }) => {
@@ -399,6 +399,18 @@ export const appRouter = router({
             })
             .where(eq(users.id, ctx.user.id));
           
+          // Run alert checks (async, don't wait)
+          const { runAlertChecks } = await import('./alertService');
+          runAlertChecks(ctx.user.id, input.simulationId).catch(err => {
+            console.error('[Alerts] Failed to run alert checks:', err);
+          });
+          
+          // Update coaching plan progress
+          const { updateCoachingProgress } = await import('./coachingService');
+          updateCoachingProgress(ctx.user.id, simulation.scenarioId).catch(err => {
+            console.error('[Coaching] Failed to update progress:', err);
+          });
+          
           return { 
             success: true, 
             evaluation: {
@@ -610,6 +622,158 @@ export const appRouter = router({
         return template;
       }),
   }),
+
+  // Coaching system router
+  coaching: router({
+    generatePlan: demoUserProcedure
+      .mutation(async ({ ctx }) => {
+        const { createCoachingPlan } = await import('./coachingService');
+        const planId = await createCoachingPlan(ctx.user.id);
+        return { success: true, planId };
+      }),
+
+    getActivePlan: demoUserProcedure
+      .query(async ({ ctx }) => {
+        const { getActiveCoachingPlan } = await import('./coachingService');
+        const plan = await getActiveCoachingPlan(ctx.user.id);
+        return plan;
+      }),
+
+    updateProgress: demoUserProcedure
+      .input(z.object({ scenarioId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const { updateCoachingProgress } = await import('./coachingService');
+        await updateCoachingProgress(ctx.user.id, input.scenarioId);
+        return { success: true };
+      }),
+
+    // Alerts for supervisors
+    getAlerts: demoUserProcedure
+      .input(z.object({
+        status: z.enum(['pending', 'acknowledged', 'resolved']).optional(),
+        type: z.enum(['low_performance', 'stagnation', 'improvement', 'milestone']).optional(),
+      }).optional())
+      .query(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        
+        const { coachingAlerts } = await import('../drizzle/schema');
+        
+        // Build query conditions
+        const conditions = [];
+        
+        // Supervisors see their team's alerts, admins see all
+        if (ctx.user.role === 'supervisor' || ctx.user.role === 'coordinador') {
+          conditions.push(eq(coachingAlerts.supervisorId, ctx.user.id));
+        }
+        // Agents see only their own alerts
+        else if (ctx.user.role === 'agente' || ctx.user.role === 'analista') {
+          conditions.push(eq(coachingAlerts.userId, ctx.user.id));
+        }
+        
+        if (input?.status) {
+          conditions.push(eq(coachingAlerts.status, input.status));
+        }
+        if (input?.type) {
+          conditions.push(eq(coachingAlerts.type, input.type));
+        }
+        
+        const alerts = await database
+          .select()
+          .from(coachingAlerts)
+          .where(conditions.length > 0 ? and(...conditions) : undefined)
+          .orderBy(desc(coachingAlerts.createdAt));
+        
+        // Parse metadata JSON
+        return alerts.map(alert => ({
+          ...alert,
+          metadata: alert.metadata ? JSON.parse(alert.metadata) : {}
+        }));
+      }),
+
+    acknowledgeAlert: demoUserProcedure
+      .input(z.object({ alertId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        
+        const { coachingAlerts } = await import('../drizzle/schema');
+        
+        await database
+          .update(coachingAlerts)
+          .set({
+            status: 'acknowledged',
+            acknowledgedAt: new Date()
+          })
+          .where(eq(coachingAlerts.id, input.alertId));
+        
+        return { success: true };
+      }),
+
+    resolveAlert: demoUserProcedure
+      .input(z.object({ alertId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const database = await getDb();
+        if (!database) throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR' });
+        
+        const { coachingAlerts } = await import('../drizzle/schema');
+        
+        await database
+          .update(coachingAlerts)
+          .set({
+            status: 'resolved',
+            resolvedAt: new Date()
+          })
+          .where(eq(coachingAlerts.id, input.alertId));
+        
+        return { success: true };
+      }),
+
+    // Buddy System endpoints
+    findBuddyCandidates: demoUserProcedure
+      .query(async ({ ctx }) => {
+        const { findBuddyCandidates } = await import('./coachingService');
+        const candidates = await findBuddyCandidates(ctx.user.id);
+        return candidates;
+      }),
+
+    createBuddyPair: demoUserProcedure
+      .input(z.object({
+        buddyId: z.number()
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { createBuddyPair } = await import('./coachingService');
+        const pairId = await createBuddyPair(ctx.user.id, input.buddyId);
+        return { success: true, pairId };
+      }),
+
+    getBuddyPair: demoUserProcedure
+      .query(async ({ ctx }) => {
+        const { getBuddyPair } = await import('./coachingService');
+        const pair = await getBuddyPair(ctx.user.id);
+        return pair;
+      }),
+
+    updateBuddyGoal: demoUserProcedure
+      .input(z.object({
+        pairId: z.number(),
+        sharedGoal: z.string()
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { updateBuddyProgress } = await import('./coachingService');
+        await updateBuddyProgress(input.pairId, input.sharedGoal);
+        return { success: true };
+      }),
+
+    endBuddyPair: demoUserProcedure
+      .input(z.object({ pairId: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const { endBuddyPair } = await import('./coachingService');
+        await endBuddyPair(input.pairId);
+        return { success: true };
+      }),
+  }),
 });
+
 
 export type AppRouter = typeof appRouter;

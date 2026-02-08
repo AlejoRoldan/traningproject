@@ -11,7 +11,8 @@ import {
   LogOut,
   Trophy,
   BarChart3,
-  Library
+  Library,
+  Sparkles
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
   { label: "Escenarios", href: "/scenarios", icon: BookOpen },
   { label: "Mis Simulaciones", href: "/simulations", icon: Target },
   { label: "Biblioteca", href: "/response-library", icon: Library },
+  { label: "Coaching IA", href: "/coaching", icon: Sparkles },
   { label: "Mi Progreso", href: "/progress", icon: TrendingUp },
   { label: "Gamificación", href: "/gamification", icon: Trophy },
   { label: "Mi Equipo", href: "/team", icon: Users },

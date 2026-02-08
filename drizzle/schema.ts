@@ -226,3 +226,127 @@ export const teamAssignments = mysqlTable("team_assignments", {
 
 export type TeamAssignment = typeof teamAssignments.$inferSelect;
 export type InsertTeamAssignment = typeof teamAssignments.$inferInsert;
+
+// Coaching plans table - AI-generated personalized improvement plans
+export const coachingPlans = mysqlTable("coaching_plans", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  status: mysqlEnum("status", ["active", "completed", "cancelled"]).default("active").notNull(),
+  generatedAt: timestamp("generatedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt"),
+  
+  // AI-generated analysis
+  weaknessAnalysis: text("weaknessAnalysis"), // JSON with detected weaknesses by category
+  strengthsAnalysis: text("strengthsAnalysis"), // JSON with detected strengths
+  priorityAreas: text("priorityAreas"), // JSON array of priority areas
+  
+  // Recommendations
+  recommendedScenarios: text("recommendedScenarios"), // JSON array of scenario IDs
+  weeklyGoal: text("weeklyGoal"), // Weekly goal (e.g., "Practice 3 Fraud scenarios this week")
+  estimatedWeeks: int("estimatedWeeks"), // Estimated weeks to complete the plan
+  
+  // Progress
+  completedScenarios: text("completedScenarios"), // JSON array of completed scenario IDs
+  progress: int("progress").default(0).notNull(), // Progress percentage (0-100)
+});
+
+export type CoachingPlan = typeof coachingPlans.$inferSelect;
+export type InsertCoachingPlan = typeof coachingPlans.$inferInsert;
+
+// Coaching alerts table - Automatic alerts for supervisors
+export const coachingAlerts = mysqlTable("coaching_alerts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // Agent who triggered the alert
+  supervisorId: int("supervisorId"), // Assigned supervisor
+  type: mysqlEnum("type", ["low_performance", "stagnation", "improvement", "milestone"]).notNull(),
+  severity: mysqlEnum("severity", ["low", "medium", "high", "critical"]).default("medium").notNull(),
+  
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  metadata: text("metadata"), // JSON with additional data (scores, simulations, etc.)
+  
+  status: mysqlEnum("status", ["pending", "acknowledged", "resolved"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  acknowledgedAt: timestamp("acknowledgedAt"),
+  resolvedAt: timestamp("resolvedAt"),
+});
+
+export type CoachingAlert = typeof coachingAlerts.$inferSelect;
+export type InsertCoachingAlert = typeof coachingAlerts.$inferInsert;
+
+// Buddy pairs table - Pairing agents with complementary strengths
+export const buddyPairs = mysqlTable("buddy_pairs", {
+  id: int("id").autoincrement().primaryKey(),
+  agentId1: int("agentId1").notNull(),
+  agentId2: int("agentId2").notNull(),
+  
+  status: mysqlEnum("status", ["suggested", "accepted", "active", "completed", "declined"]).default("suggested").notNull(),
+  matchScore: int("matchScore"), // Compatibility score (0-100)
+  matchReason: text("matchReason"), // Explanation of the matching
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  acceptedAt: timestamp("acceptedAt"),
+  completedAt: timestamp("completedAt"),
+  
+  // Buddy system goals
+  sharedGoal: text("sharedGoal"),
+  targetWeeks: int("targetWeeks").default(4).notNull(),
+});
+
+export type BuddyPair = typeof buddyPairs.$inferSelect;
+export type InsertBuddyPair = typeof buddyPairs.$inferInsert;
+
+// Micro-learning content table - Videos, articles, and resources
+export const microLearningContent = mysqlTable("micro_learning_content", {
+  id: int("id").autoincrement().primaryKey(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  type: mysqlEnum("type", ["video", "article", "quiz", "infographic"]).notNull(),
+  
+  // Content
+  url: varchar("url", { length: 500 }), // URL of the video/resource
+  duration: int("duration"), // Duration in seconds
+  thumbnail: varchar("thumbnail", { length: 500 }),
+  
+  // Categorization
+  category: mysqlEnum("category", [
+    "informative",
+    "transactional",
+    "fraud",
+    "money_laundering",
+    "theft",
+    "complaint",
+    "credit",
+    "digital_channels"
+  ]),
+  skill: varchar("skill", { length: 100 }), // Specific skill (empathy, clarity, protocol, etc.)
+  level: mysqlEnum("level", ["basico", "intermedio", "avanzado", "experto"]).default("basico").notNull(),
+  
+  // Metadata
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  viewCount: int("viewCount").default(0).notNull(),
+  avgRating: varchar("avgRating", { length: 10 }).default("0").notNull(),
+});
+
+export type MicroLearningContent = typeof microLearningContent.$inferSelect;
+export type InsertMicroLearningContent = typeof microLearningContent.$inferInsert;
+
+// Learning progress table - Tracking content consumed by each agent
+export const learningProgress = mysqlTable("learning_progress", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  contentId: int("contentId").notNull(),
+  
+  status: mysqlEnum("status", ["started", "in_progress", "completed"]).default("started").notNull(),
+  progressPercent: int("progressPercent").default(0).notNull(),
+  
+  startedAt: timestamp("startedAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+  timeSpent: int("timeSpent").default(0).notNull(), // Seconds
+  
+  rating: int("rating"), // 1-5 stars
+  feedback: text("feedback"),
+});
+
+export type LearningProgress = typeof learningProgress.$inferSelect;
+export type InsertLearningProgress = typeof learningProgress.$inferInsert;
