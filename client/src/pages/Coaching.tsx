@@ -30,25 +30,27 @@ export default function Coaching() {
   const utils = trpc.useUtils();
   
   // Fetch active coaching plan
-  const { data: activePlan, isLoading: planLoading } = trpc.coaching.getActivePlan.useQuery();
+  const { data: activePlan, isLoading: planLoading } = trpc.coaching.getActivePlan.useQuery(undefined, {
+    retry: false
+  });
   
   // Fetch buddy pair
   const { data: buddyPair, isLoading: buddyLoading } = trpc.coaching.getBuddyPair.useQuery();
   
   // Fetch buddy candidates
-  const { data: buddyCandidates, isLoading: candidatesLoading } = trpc.coaching.findBuddyCandidates.useQuery();
+  const { data: buddyCandidates, isLoading: candidatesLoading } = trpc.coaching.findBuddyCandidates.useQuery(undefined, {
+    retry: false
+  });
   
   // Fetch alerts
-  const { data: alerts, isLoading: alertsLoading } = trpc.coaching.getAlerts.useQuery();
+  const { data: alerts, isLoading: alertsLoading } = trpc.coaching.getAlerts.useQuery(undefined, {
+    retry: false
+  });
   
   // Mutations
   const generatePlan = trpc.coaching.generatePlan.useMutation({
     onSuccess: () => {
       utils.coaching.getActivePlan.invalidate();
-    },
-    onError: (error) => {
-      // Error is already shown in the UI, no need to log
-      console.error('Error generating plan:', error.message);
     }
   });
   

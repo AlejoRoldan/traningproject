@@ -429,3 +429,10 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Mejorar manejo de error cuando no hay suficientes simulaciones
 - [x] Mostrar mensaje amigable en lugar de error en consola
 - [x] Agregar enlace directo a escenarios desde mensaje de error
+
+
+## 🧹 Limpieza de Errores en Consola
+
+- [x] Eliminar console.error innecesario en página de Coaching
+- [x] Suprimir errores de tRPC en consola para errores esperados del negocio (retry: false)
+- [x] Mantener solo mensajes amigables en UI
