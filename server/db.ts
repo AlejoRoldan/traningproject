@@ -74,8 +74,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
       values.role = 'admin';
       updateSet.role = 'admin';
     } else {
-      values.role = 'agent'; // Default role
-      updateSet.role = 'agent';
+      values.role = 'agente'; // Default role
+      updateSet.role = 'agente';
     }
 
     if (user.supervisorId !== undefined) {

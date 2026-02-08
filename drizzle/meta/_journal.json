@@ -64,6 +64,20 @@
       "when": 1770123613565,
       "tag": "0008_fair_jetstream",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1770559113052,
+      "tag": "0009_tense_rictor",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1770559150285,
+      "tag": "0010_futuristic_stranger",
+      "breakpoints": true
     }
   ]
 }

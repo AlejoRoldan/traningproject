@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `users` MODIFY COLUMN `role` enum('gerente','supervisor','coordinador','analista','agente','admin') NOT NULL DEFAULT 'agente';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3irpNWmUc4ctRuT.6a7388c9cb8f --database 9y9hjjz29oG5PHr9mg6PsX --execute ALTER TABLE `users` MODIFY COLUMN `role` enum('gerente','supervisor','coordinador','analista','agente','admin') NOT NULL DEFAULT 'agente';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 863
+}

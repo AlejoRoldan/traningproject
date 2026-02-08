@@ -265,3 +265,16 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Extraer información de organigrama real de Kaitel
 - [ ] Actualizar interfaz con nombre "Kaitel Training Platform"
 - [ ] Agregar información corporativa en página About/Acerca de
+
+
+## 🔐 Sistema de Roles y Permisos Basado en Organigrama Kaitel
+
+- [x] Diseñar matriz de permisos por rol (Gerente, Supervisor, Coordinador, Analista, Agente)
+- [x] Actualizar enum de roles en schema.ts
+- [x] Crear tabla team_assignments en base de datos
+- [x] Implementar middleware de autorización en backend (requireRole, requireMinRole, canAccessTeamData)
+- [ ] Actualizar procedimientos tRPC con validación de permisos
+- [ ] Modificar interfaz para mostrar/ocultar funcionalidades según rol
+- [ ] Crear página de administración de usuarios (solo Gerentes)
+- [ ] Implementar asignación de roles por Gerentes/Supervisores
+- [ ] Probar flujos completos para cada rol

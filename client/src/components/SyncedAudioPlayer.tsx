@@ -80,7 +80,7 @@ export default function SyncedAudioPlayer({ audioUrl, segments, keywords = [], s
     },
   });
   
-  const isSupervisor = user?.role === 'admin' || user?.role === 'supervisor' || user?.role === 'trainer';
+  const isSupervisor = user?.role === 'admin' || user?.role === 'gerente' || user?.role === 'supervisor' || user?.role === 'coordinador';
 
   // Update current time
   useEffect(() => {

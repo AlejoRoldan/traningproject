@@ -11,7 +11,7 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin", "agent", "supervisor", "trainer"]).default("agent").notNull(),
+  role: mysqlEnum("role", ["gerente", "supervisor", "coordinador", "analista", "agente", "admin"]).default("agente").notNull(),
   department: varchar("department", { length: 100 }),
   supervisorId: int("supervisorId"),
   level: mysqlEnum("level", ["junior", "intermediate", "senior", "expert"]).default("junior"),
@@ -210,3 +210,19 @@ export const responseTemplates = mysqlTable("response_templates", {
 
 export type ResponseTemplate = typeof responseTemplates.$inferSelect;
 export type InsertResponseTemplate = typeof responseTemplates.$inferInsert;
+
+// Team assignments table - Assign users to teams/departments
+export const teamAssignments = mysqlTable("team_assignments", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  teamName: varchar("teamName", { length: 100 }).notNull(), // e.g., "Equipo Inbound Center - Banco Itaú"
+  department: varchar("department", { length: 100 }).notNull(), // e.g., "Experiencia Presencial", "Tecnología"
+  area: varchar("area", { length: 100 }), // e.g., "Calidad", "IA", "STI"
+  managerId: int("managerId"), // Gerente responsable
+  supervisorId: int("supervisorId"), // Supervisor directo
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TeamAssignment = typeof teamAssignments.$inferSelect;
+export type InsertTeamAssignment = typeof teamAssignments.$inferInsert;

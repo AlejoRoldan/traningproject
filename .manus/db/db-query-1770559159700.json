@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `team_assignments` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`teamName` varchar(100) NOT NULL,\n\t`department` varchar(100) NOT NULL,\n\t`area` varchar(100),\n\t`managerId` int,\n\t`supervisorId` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `team_assignments_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3irpNWmUc4ctRuT.6a7388c9cb8f --database 9y9hjjz29oG5PHr9mg6PsX --execute CREATE TABLE `team_assignments` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`userId` int NOT NULL,\n\t`teamName` varchar(100) NOT NULL,\n\t`department` varchar(100) NOT NULL,\n\t`area` varchar(100),\n\t`managerId` int,\n\t`supervisorId` int,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `team_assignments_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 523
+}
