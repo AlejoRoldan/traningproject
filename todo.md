@@ -436,3 +436,11 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Eliminar console.error innecesario en página de Coaching
 - [x] Suprimir errores de tRPC en consola para errores esperados del negocio (retry: false)
 - [x] Mantener solo mensajes amigables en UI
+
+
+## 🔍 Verificación de Requisitos de Coaching
+
+- [x] Crear endpoint checkEligibility para verificar si usuario cumple requisitos
+- [x] Actualizar UI para hacer queries condicionales basadas en elegibilidad (enabled: isEligible)
+- [x] Eliminar completamente errores de consola en página de coaching
+- [x] Mostrar barra de progreso con simulaciones completadas

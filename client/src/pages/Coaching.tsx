@@ -29,21 +29,30 @@ export default function Coaching() {
   
   const utils = trpc.useUtils();
   
-  // Fetch active coaching plan
+  // Check eligibility first
+  const { data: eligibility, isLoading: eligibilityLoading } = trpc.coaching.checkEligibility.useQuery();
+  const isEligible = eligibility?.eligible ?? false;
+  
+  // Fetch active coaching plan (only if eligible)
   const { data: activePlan, isLoading: planLoading } = trpc.coaching.getActivePlan.useQuery(undefined, {
+    enabled: isEligible,
     retry: false
   });
   
-  // Fetch buddy pair
-  const { data: buddyPair, isLoading: buddyLoading } = trpc.coaching.getBuddyPair.useQuery();
+  // Fetch buddy pair (only if eligible)
+  const { data: buddyPair, isLoading: buddyLoading } = trpc.coaching.getBuddyPair.useQuery(undefined, {
+    enabled: isEligible
+  });
   
-  // Fetch buddy candidates
+  // Fetch buddy candidates (only if eligible)
   const { data: buddyCandidates, isLoading: candidatesLoading } = trpc.coaching.findBuddyCandidates.useQuery(undefined, {
+    enabled: isEligible,
     retry: false
   });
   
-  // Fetch alerts
+  // Fetch alerts (only if eligible)
   const { data: alerts, isLoading: alertsLoading } = trpc.coaching.getAlerts.useQuery(undefined, {
+    enabled: isEligible,
     retry: false
   });
   
@@ -126,7 +135,7 @@ export default function Coaching() {
           <h1 className="text-3xl font-bold">Mi Plan de Coaching</h1>
           <p className="text-muted-foreground">Mejora continua personalizada con IA</p>
         </div>
-        {!activePlan && (
+        {isEligible && !activePlan && (
           <Button 
             onClick={handleGeneratePlan}
             disabled={generatePlan.isPending}
@@ -138,28 +147,27 @@ export default function Coaching() {
         )}
       </div>
 
-      {planLoading ? (
+      {eligibilityLoading || planLoading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">Cargando plan de coaching...</p>
         </div>
-      ) : !activePlan ? (
+      ) : !isEligible ? (
         <Card className="border-dashed">
           <CardHeader className="text-center">
             <Target className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <CardTitle>No tienes un plan de coaching activo</CardTitle>
+            <CardTitle>Completa más simulaciones para desbloquear Coaching IA</CardTitle>
             <CardDescription>
-              Completa al menos 3 simulaciones para que la IA pueda analizar tu desempeño y generar un plan personalizado
+              Has completado {eligibility?.simulationsCompleted || 0} de {eligibility?.simulationsRequired || 3} simulaciones necesarias
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            {generatePlan.isError && (
-              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-sm text-yellow-800">
-                  <AlertCircle className="inline h-4 w-4 mr-2" />
-                  {generatePlan.error.message}
-                </p>
+            <div className="max-w-md mx-auto">
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-muted-foreground">Progreso</span>
+                <span className="font-medium">{eligibility?.simulationsCompleted || 0}/{eligibility?.simulationsRequired || 3}</span>
               </div>
-            )}
+              <Progress value={((eligibility?.simulationsCompleted || 0) / (eligibility?.simulationsRequired || 3)) * 100} className="h-2" />
+            </div>
             <Link href="/scenarios">
               <Button variant="outline">
                 Ir a Escenarios
@@ -167,6 +175,16 @@ export default function Coaching() {
               </Button>
             </Link>
           </CardContent>
+        </Card>
+      ) : !activePlan ? (
+        <Card className="border-dashed">
+          <CardHeader className="text-center">
+            <Target className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+            <CardTitle>No tienes un plan de coaching activo</CardTitle>
+            <CardDescription>
+              Haz clic en "Generar Plan de Mejora" para crear tu plan personalizado
+            </CardDescription>
+          </CardHeader>
         </Card>
       ) : (
         <Tabs defaultValue="plan" className="space-y-6">

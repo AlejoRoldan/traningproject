@@ -625,6 +625,24 @@ export const appRouter = router({
 
   // Coaching system router
   coaching: router({
+    checkEligibility: demoUserProcedure
+      .query(async ({ ctx }) => {
+        const stats = await db.getUserStats(ctx.user.id);
+        if (!stats) {
+          return {
+            eligible: false,
+            simulationsCompleted: 0,
+            simulationsRequired: 3
+          };
+        }
+        const hasEnoughSimulations = stats.totalSimulations >= 3;
+        return {
+          eligible: hasEnoughSimulations,
+          simulationsCompleted: stats.totalSimulations,
+          simulationsRequired: 3
+        };
+      }),
+
     generatePlan: demoUserProcedure
       .mutation(async ({ ctx }) => {
         const { createCoachingPlan } = await import('./coachingService');
