@@ -256,3 +256,12 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Agregar botón de acceso rápido en interfaz de simulación
 - [x] Agregar enlace en menú de navegación
 - [x] Incluir ejemplos de: apertura, desarrollo, cierre, manejo de objeciones
+
+
+## 🏢 Incorporación de Identidad Corporativa Kaitel
+
+- [x] Crear tabla company_info en base de datos
+- [x] Insertar visión y misión de Kaitel
+- [x] Extraer información de organigrama real de Kaitel
+- [ ] Actualizar interfaz con nombre "Kaitel Training Platform"
+- [ ] Agregar información corporativa en página About/Acerca de
