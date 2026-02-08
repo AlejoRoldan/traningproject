@@ -415,3 +415,10 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [ ] Integrar recomendaciones en plan de coaching
 - [ ] Tracking de contenido completado
 
+
+
+## 🔧 Corrección de WebSocket HMR
+
+- [x] Configurar Vite HMR para entorno de desarrollo Manus
+- [x] Actualizar vite.config.ts con configuración de WebSocket
+- [x] Verificar que no haya errores de conexión en consola
