@@ -196,33 +196,46 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
     }
 
     // Calculate weighted overall score
+    // Ensure evaluation criteria values are valid numbers
+    const empathyWeight = Number(evaluationCriteria.empathy) || 20;
+    const clarityWeight = Number(evaluationCriteria.clarity) || 20;
+    const protocolWeight = Number(evaluationCriteria.protocol) || 20;
+    const resolutionWeight = Number(evaluationCriteria.resolution) || 20;
+    const confidenceWeight = 20; // Fixed 20% weight
+
+    // Normalize weights to ensure they sum to 100
+    const totalWeight = empathyWeight + clarityWeight + protocolWeight + resolutionWeight + confidenceWeight;
     const weights = {
-      empathy: evaluationCriteria.empathy / 100,
-      clarity: evaluationCriteria.clarity / 100,
-      protocol: evaluationCriteria.protocol / 100,
-      resolution: evaluationCriteria.resolution / 100,
-      confidence: 0.20 // Fixed 20% weight
+      empathy: empathyWeight / totalWeight,
+      clarity: clarityWeight / totalWeight,
+      protocol: protocolWeight / totalWeight,
+      resolution: resolutionWeight / totalWeight,
+      confidence: confidenceWeight / totalWeight
     };
 
-    // Ensure all values are valid numbers
+    // Ensure all values are valid numbers with fallback to 75
     const empathy = Number(evaluationData.empathy) || 75;
     const clarity = Number(evaluationData.clarity) || 75;
     const protocol = Number(evaluationData.protocol) || 75;
     const resolution = Number(evaluationData.resolution) || 75;
     const confidence = Number(evaluationData.confidence) || 75;
 
-    const overallScore = Math.round(
+    // Calculate overall score with validation
+    const rawOverallScore = 
       empathy * weights.empathy +
       clarity * weights.clarity +
       protocol * weights.protocol +
       resolution * weights.resolution +
-      confidence * weights.confidence
-    );
+      confidence * weights.confidence;
+
+    // Ensure overallScore is a valid number
+    const overallScore = Number.isFinite(rawOverallScore) ? Math.round(rawOverallScore) : 75;
 
     // Calculate points earned based on score and complexity
-    const basePoints = Math.round(overallScore * scenario.complexity);
+    const complexity = Number(scenario.complexity) || 1;
+    const basePoints = Math.round(overallScore * complexity);
     const bonusPoints = overallScore >= 90 ? 50 : overallScore >= 80 ? 25 : 0;
-    const pointsEarned = basePoints + bonusPoints;
+    const pointsEarned = Number.isFinite(basePoints + bonusPoints) ? basePoints + bonusPoints : 0;
 
     // Determine badges earned
     const badgesEarned: string[] = [];

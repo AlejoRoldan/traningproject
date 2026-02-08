@@ -278,3 +278,11 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [ ] Crear página de administración de usuarios (solo Gerentes)
 - [ ] Implementar asignación de roles por Gerentes/Supervisores
 - [ ] Probar flujos completos para cada rol
+
+
+## 🐛 Bug: NaN en Evaluación de Simulaciones
+
+- [x] Identificar por qué overallScore y pointsEarned retornan NaN (pesos no normalizados)
+- [x] Corregir validación de números en evaluationService.ts
+- [x] Normalizar pesos para que sumen 1.0
+- [x] Agregar validación Number.isFinite() para prevenir NaN
