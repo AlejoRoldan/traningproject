@@ -444,3 +444,10 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Actualizar UI para hacer queries condicionales basadas en elegibilidad (enabled: isEligible)
 - [x] Eliminar completamente errores de consola en página de coaching
 - [x] Mostrar barra de progreso con simulaciones completadas
+
+
+## 🐛 Corrección de Query getBuddyPair
+
+- [x] Identificar que el error viene del listener global en main.tsx
+- [x] Filtrar errores esperados del negocio en listeners globales
+- [x] Verificar que no haya más errores en consola

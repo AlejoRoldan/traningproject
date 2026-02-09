@@ -25,6 +25,13 @@ queryClient.getQueryCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.query.state.error;
     redirectToLoginIfUnauthorized(error);
+    
+    // Filter out expected business errors (coaching eligibility)
+    if (error instanceof TRPCClientError && 
+        error.message.includes("Not enough simulations")) {
+      return; // Don't log expected business errors
+    }
+    
     console.error("[API Query Error]", error);
   }
 });
@@ -33,6 +40,13 @@ queryClient.getMutationCache().subscribe(event => {
   if (event.type === "updated" && event.action.type === "error") {
     const error = event.mutation.state.error;
     redirectToLoginIfUnauthorized(error);
+    
+    // Filter out expected business errors (coaching eligibility)
+    if (error instanceof TRPCClientError && 
+        error.message.includes("Not enough simulations")) {
+      return; // Don't log expected business errors
+    }
+    
     console.error("[API Mutation Error]", error);
   }
 });
