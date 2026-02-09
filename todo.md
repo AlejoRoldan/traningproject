@@ -468,3 +468,11 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Crear endpoints de analíticas en backend (getOverallStats, getCategoryPerformance, getTimeSeriesData, getLeaderboard)
 - [x] Agregar ruta /analytics en App.tsx
 - [x] Probar funcionalidad completa (todos los tabs funcionando correctamente)
+
+
+## 🐛 Corrección de Query de Series Temporales
+
+- [x] Corregir query getTimeSeriesData para manejar completedAt NULL
+- [x] Agregar filtro isNotNull en la condición WHERE
+- [x] Agregar filtro isNotNull para duration también
+- [x] Probar funcionalidad (sin errores en consola)

@@ -12,7 +12,7 @@ import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates } from "../drizzle/schema";
-import { eq, desc, and, sql, gte } from "drizzle-orm";
+import { eq, desc, and, sql, gte, isNotNull } from "drizzle-orm";
 
 // Demo user procedure (no authentication required)
 const demoUserProcedure = publicProcedure.use(({ ctx, next }) => {
@@ -830,7 +830,12 @@ export const appRouter = router({
         const [avgDurationResult] = await db
           .select({ avg: sql<number>`avg(${simulations.duration})` })
           .from(simulations)
-          .where(eq(simulations.status, 'completed'));
+          .where(
+            and(
+              eq(simulations.status, 'completed'),
+              isNotNull(simulations.duration)
+            )
+          );
         const averageDuration = Math.round(avgDurationResult?.avg || 0);
 
         return {
@@ -879,6 +884,7 @@ export const appRouter = router({
           .where(
             and(
               eq(simulations.status, 'completed'),
+              isNotNull(simulations.completedAt),
               gte(simulations.completedAt, thirtyDaysAgo)
             )
           )
