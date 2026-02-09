@@ -451,3 +451,11 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Identificar que el error viene del listener global en main.tsx
 - [x] Filtrar errores esperados del negocio en listeners globales
 - [x] Verificar que no haya más errores en consola
+
+
+## 👥 Preview de Buddy Candidates
+
+- [x] Modificar query de buddy candidates para funcionar sin elegibilidad
+- [x] Actualizar UI para mostrar top 3 candidatos siempre
+- [x] Agregar mensaje motivacional para usuarios no elegibles
+- [x] Mostrar compatibilidad y fortalezas de cada candidato

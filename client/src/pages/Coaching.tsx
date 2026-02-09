@@ -44,9 +44,8 @@ export default function Coaching() {
     enabled: isEligible
   });
   
-  // Fetch buddy candidates (only if eligible)
+  // Fetch buddy candidates (always show preview)
   const { data: buddyCandidates, isLoading: candidatesLoading } = trpc.coaching.findBuddyCandidates.useQuery(undefined, {
-    enabled: isEligible,
     retry: false
   });
   
@@ -344,6 +343,68 @@ export default function Coaching() {
               <div className="text-center py-12">
                 <p className="text-muted-foreground">Cargando información de buddy...</p>
               </div>
+            ) : !isEligible ? (
+              <Card className="border-dashed">
+                <CardHeader className="text-center">
+                  <UserPlus className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <CardTitle>Preview de Buddies Disponibles</CardTitle>
+                  <CardDescription>
+                    Completa {eligibility?.simulationsRequired || 3} simulaciones para desbloquear el Buddy System y conectar con estos agentes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {candidatesLoading ? (
+                    <p className="text-center text-muted-foreground">Buscando candidatos...</p>
+                  ) : buddyCandidates && buddyCandidates.length > 0 ? (
+                    <>
+                      <div className="text-sm text-muted-foreground text-center mb-4">
+                        Top 3 candidatos compatibles basados en datos generales
+                      </div>
+                      {buddyCandidates.slice(0, 3).map((candidate: any) => (
+                        <div key={candidate.userId} className="border rounded-lg p-4 opacity-75">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <h4 className="font-semibold">{candidate.name}</h4>
+                              <p className="text-sm text-muted-foreground">{candidate.role} - {candidate.area}</p>
+                            </div>
+                            <Badge variant="secondary">{candidate.compatibilityScore}% compatible</Badge>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <p className="text-sm font-medium mb-1">Fortalezas:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {candidate.strengths.slice(0, 3).map((s: any, i: number) => (
+                                  <Badge key={i} variant="outline" className="text-xs">
+                                    {s.category}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium mb-1">Por qué es compatible:</p>
+                              <ul className="text-sm text-muted-foreground space-y-1">
+                                {candidate.matchReasons.slice(0, 2).map((reason: string, i: number) => (
+                                  <li key={i}>• {reason}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="text-center pt-4">
+                        <Link href="/scenarios">
+                          <Button variant="outline">
+                            Completar Simulaciones para Desbloquear
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <p className="text-center text-muted-foreground">No hay candidatos disponibles en este momento</p>
+                  )}
+                </CardContent>
+              </Card>
             ) : buddyPair ? (
               <Card>
                 <CardHeader>

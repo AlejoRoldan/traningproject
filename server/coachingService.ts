@@ -369,8 +369,20 @@ export async function findBuddyCandidates(userId: number): Promise<BuddyCandidat
   const db = await getDb();
   if (!db) throw new Error('Database connection failed');
   
-  // Get agent's profile and performance
-  const { weaknesses, strengths } = await analyzeAgentPerformance(userId);
+  // Try to get agent's profile and performance
+  let weaknesses: WeaknessAnalysis[] = [];
+  let strengths: StrengthAnalysis[] = [];
+  let hasPerformanceData = false;
+  
+  try {
+    const analysis = await analyzeAgentPerformance(userId);
+    weaknesses = analysis.weaknesses;
+    strengths = analysis.strengths;
+    hasPerformanceData = true;
+  } catch (error) {
+    // User doesn't have enough simulations yet, show general candidates
+    hasPerformanceData = false;
+  }
   
   // Get agent's info
   const [agent] = await db
@@ -409,34 +421,49 @@ export async function findBuddyCandidates(userId: number): Promise<BuddyCandidat
       let compatibilityScore = 0;
       const matchReasons: string[] = [];
       
-      // Check for complementary skills
-      for (const weakness of weaknesses) {
-        const candidateStrength = candidatePerf.strengths.find(
-          s => s.category === weakness.category && s.currentScore >= 75
-        );
-        
-        if (candidateStrength) {
-          compatibilityScore += 30;
-          matchReasons.push(`Fuerte en ${weakness.category} (tu debilidad)`);
+      if (hasPerformanceData) {
+        // Check for complementary skills
+        for (const weakness of weaknesses) {
+          const candidateStrength = candidatePerf.strengths.find(
+            s => s.category === weakness.category && s.currentScore >= 75
+          );
+          
+          if (candidateStrength) {
+            compatibilityScore += 30;
+            matchReasons.push(`Fuerte en ${weakness.category} (tu debilidad)`);
+          }
         }
-      }
-      
-      // Check if candidate has weaknesses where agent is strong
-      for (const strength of strengths) {
-        const candidateWeakness = candidatePerf.weaknesses.find(
-          w => w.category === strength.category
-        );
         
-        if (candidateWeakness) {
+        // Check if candidate has weaknesses where agent is strong
+        for (const strength of strengths) {
+          const candidateWeakness = candidatePerf.weaknesses.find(
+            w => w.category === strength.category
+          );
+          
+          if (candidateWeakness) {
+            compatibilityScore += 20;
+            matchReasons.push(`Puedes ayudar en ${strength.category}`);
+          }
+        }
+        
+        // Bonus for mutual benefit (both can help each other)
+        if (matchReasons.length >= 2) {
           compatibilityScore += 20;
-          matchReasons.push(`Puedes ayudar en ${strength.category}`);
+          matchReasons.push('Beneficio mutuo');
         }
-      }
-      
-      // Bonus for mutual benefit (both can help each other)
-      if (matchReasons.length >= 2) {
-        compatibilityScore += 20;
-        matchReasons.push('Beneficio mutuo');
+      } else {
+        // No performance data yet, show general compatibility
+        compatibilityScore = 50; // Base score for preview
+        
+        // Highlight candidate's top strengths
+        const topStrengths = candidatePerf.strengths.slice(0, 2);
+        for (const strength of topStrengths) {
+          matchReasons.push(`Experto en ${strength.category}`);
+        }
+        
+        if (matchReasons.length === 0) {
+          matchReasons.push('Agente experimentado');
+        }
       }
       
       // Only include candidates with some compatibility
