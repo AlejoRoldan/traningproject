@@ -12,7 +12,7 @@ import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates } from "../drizzle/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql, gte } from "drizzle-orm";
 
 // Demo user procedure (no authentication required)
 const demoUserProcedure = publicProcedure.use(({ ctx, next }) => {
@@ -790,8 +790,126 @@ export const appRouter = router({
         await endBuddyPair(input.pairId);
         return { success: true };
       }),
+    }),
+
+  // Analytics router
+  analytics: router({
+    getOverallStats: demoUserProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) throw new Error('Database connection failed');
+
+        // Total simulations
+        const [totalResult] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(simulations);
+        const totalSimulations = totalResult?.count || 0;
+
+        // Completed simulations
+        const [completedResult] = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(simulations)
+          .where(eq(simulations.status, 'completed'));
+        const completedSimulations = completedResult?.count || 0;
+
+        // Average score
+        const [avgScoreResult] = await db
+          .select({ avg: sql<number>`avg(${simulations.overallScore})` })
+          .from(simulations)
+          .where(eq(simulations.status, 'completed'));
+        const averageScore = Math.round(avgScoreResult?.avg || 0);
+
+        // Active users
+        const [activeUsersResult] = await db
+          .select({ count: sql<number>`count(distinct ${simulations.userId})` })
+          .from(simulations)
+          .where(eq(simulations.status, 'completed'));
+        const activeUsers = activeUsersResult?.count || 0;
+
+        // Average duration (in minutes)
+        const [avgDurationResult] = await db
+          .select({ avg: sql<number>`avg(${simulations.duration})` })
+          .from(simulations)
+          .where(eq(simulations.status, 'completed'));
+        const averageDuration = Math.round(avgDurationResult?.avg || 0);
+
+        return {
+          totalSimulations,
+          completedSimulations,
+          averageScore,
+          activeUsers,
+          averageDuration
+        };
+      }),
+
+    getCategoryPerformance: demoUserProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) throw new Error('Database connection failed');
+
+        const results = await db
+          .select({
+            category: scenarios.category,
+            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+            totalAttempts: sql<number>`count(*)`
+          })
+          .from(simulations)
+          .innerJoin(scenarios, eq(simulations.scenarioId, scenarios.id))
+          .where(eq(simulations.status, 'completed'))
+          .groupBy(scenarios.category);
+
+        return results;
+      }),
+
+    getTimeSeriesData: demoUserProcedure
+      .query(async () => {
+        const db = await getDb();
+        if (!db) throw new Error('Database connection failed');
+
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const results = await db
+          .select({
+            date: sql<string>`date(${simulations.completedAt})`,
+            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+            simulationsCount: sql<number>`count(*)`
+          })
+          .from(simulations)
+          .where(
+            and(
+              eq(simulations.status, 'completed'),
+              gte(simulations.completedAt, thirtyDaysAgo)
+            )
+          )
+          .groupBy(sql`date(${simulations.completedAt})`)
+          .orderBy(sql`date(${simulations.completedAt})`);
+
+        return results;
+      }),
+
+    getLeaderboard: demoUserProcedure
+      .input(z.object({ limit: z.number().default(10) }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database connection failed');
+
+        const results = await db
+          .select({
+            userId: simulations.userId,
+            userName: sql<string>`null`,
+            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+            completedSimulations: sql<number>`count(*)`,
+            totalPoints: sql<number>`sum(${simulations.pointsEarned})`
+          })
+          .from(simulations)
+          .where(eq(simulations.status, 'completed'))
+          .groupBy(simulations.userId)
+          .orderBy(desc(sql`avg(${simulations.overallScore})`), desc(sql`count(*)`))
+          .limit(input.limit);
+
+        return results;
+      }),
   }),
 });
-
-
 export type AppRouter = typeof appRouter;
