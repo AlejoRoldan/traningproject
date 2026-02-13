@@ -476,3 +476,15 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Agregar filtro isNotNull en la condición WHERE
 - [x] Agregar filtro isNotNull para duration también
 - [x] Probar funcionalidad (sin errores en consola)
+
+
+## 🔍 Filtros Desplegables en Analíticas
+
+- [x] Crear endpoints con parámetros de filtro por agente/departamento
+- [x] Actualizar getOverallStats para soportar filtros
+- [x] Actualizar getCategoryPerformance para soportar filtros
+- [x] Actualizar getTimeSeriesData para soportar filtros
+- [x] Actualizar getLeaderboard para soportar filtros
+- [x] Crear endpoint getAgentsList para obtener lista de agentes
+- [x] Agregar selectores de filtro en UI de Analytics
+- [x] Probar funcionalidad de filtros (funcionando correctamente)

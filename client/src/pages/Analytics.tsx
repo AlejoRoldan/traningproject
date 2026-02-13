@@ -3,12 +3,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { trpc } from "@/lib/trpc";
 import { BarChart3, TrendingUp, Users, Target, Award, Clock } from "lucide-react";
+import { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Analytics() {
-  const { data: stats, isLoading: statsLoading } = trpc.analytics.getOverallStats.useQuery();
-  const { data: categoryPerformance, isLoading: categoryLoading } = trpc.analytics.getCategoryPerformance.useQuery();
-  const { data: timeSeriesData, isLoading: timeSeriesLoading } = trpc.analytics.getTimeSeriesData.useQuery();
-  const { data: leaderboard, isLoading: leaderboardLoading } = trpc.analytics.getLeaderboard.useQuery({ limit: 10 });
+  const [selectedAgentId, setSelectedAgentId] = useState<number | undefined>(undefined);
+  
+  const { data: agentsList } = trpc.analytics.getAgentsList.useQuery();
+  const { data: stats, isLoading: statsLoading } = trpc.analytics.getOverallStats.useQuery({ userId: selectedAgentId });
+  const { data: categoryPerformance, isLoading: categoryLoading } = trpc.analytics.getCategoryPerformance.useQuery({ userId: selectedAgentId });
+  const { data: timeSeriesData, isLoading: timeSeriesLoading } = trpc.analytics.getTimeSeriesData.useQuery({ userId: selectedAgentId });
+  const { data: leaderboard, isLoading: leaderboardLoading } = trpc.analytics.getLeaderboard.useQuery({ limit: 10, userId: selectedAgentId });
 
   if (statsLoading || categoryLoading || timeSeriesLoading || leaderboardLoading) {
     return (
@@ -22,11 +27,30 @@ export default function Analytics() {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Analíticas</h1>
-        <p className="text-muted-foreground">
-          Métricas y estadísticas de rendimiento de la plataforma
-        </p>
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">Analíticas</h1>
+          <p className="text-muted-foreground">
+            Métricas y estadísticas de rendimiento de la plataforma
+          </p>
+        </div>
+        
+        <div className="w-48">
+          <label className="text-sm font-medium mb-2 block">Filtrar por Agente</label>
+          <Select value={selectedAgentId?.toString() || "all"} onValueChange={(value) => setSelectedAgentId(value === "all" ? undefined : parseInt(value))}>
+            <SelectTrigger>
+              <SelectValue placeholder="Todos los agentes" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos los agentes</SelectItem>
+              {agentsList?.map((agentId) => (
+                <SelectItem key={agentId} value={agentId.toString()}>
+                  Agente {agentId}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Overall Stats Cards */}
