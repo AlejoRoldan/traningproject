@@ -43,17 +43,17 @@
 }
 
 :root {
-  /* Itti Green as primary color */
-  --primary: oklch(0.68 0.20 166); /* #00D084 Itti Green */
+  /* Kaitel Brand Colors: Magenta/Pink and Blue */
+  --primary: oklch(0.65 0.22 340); /* #E91E8C Kaitel Magenta */
   --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.68 0.20 166);
+  --sidebar-primary: oklch(0.65 0.22 340); /* Kaitel Magenta */
   --sidebar-primary-foreground: oklch(1 0 0);
-  /* Itti color palette for charts */
-  --chart-1: oklch(0.85 0.15 166); /* Light green */
-  --chart-2: oklch(0.68 0.20 166); /* Itti green */
-  --chart-3: oklch(0.55 0.18 166); /* Dark green */
-  --chart-4: oklch(0.65 0.15 220); /* Blue accent */
-  --chart-5: oklch(0.45 0.10 220); /* Dark blue */
+  /* Kaitel color palette for charts */
+  --chart-1: oklch(0.80 0.18 340); /* Light magenta */
+  --chart-2: oklch(0.65 0.22 340); /* Kaitel magenta */
+  --chart-3: oklch(0.50 0.20 340); /* Dark magenta */
+  --chart-4: oklch(0.60 0.18 260); /* Kaitel blue */
+  --chart-5: oklch(0.45 0.15 260); /* Dark blue */
   --radius: 0.75rem; /* Itti rounded corners */
   --background: oklch(1 0 0);
   --foreground: oklch(0.235 0.015 65);
@@ -81,10 +81,10 @@
 }
 
 .dark {
-  /* Itti Green for dark mode */
-  --primary: oklch(0.68 0.20 166);
+  /* Kaitel Brand Colors for dark mode */
+  --primary: oklch(0.75 0.20 340); /* Lighter magenta for dark mode */
   --primary-foreground: oklch(0.1 0 0);
-  --sidebar-primary: oklch(0.68 0.20 166);
+  --sidebar-primary: oklch(0.65 0.22 340); /* Kaitel Magenta */
   --sidebar-primary-foreground: oklch(1 0 0);
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.85 0.005 65);
@@ -103,12 +103,12 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.488 0.243 264.376);
-  /* Itti color palette for charts */
-  --chart-1: oklch(0.85 0.15 166); /* Light green */
-  --chart-2: oklch(0.68 0.20 166); /* Itti green */
-  --chart-3: oklch(0.55 0.18 166); /* Dark green */
-  --chart-4: oklch(0.65 0.15 220); /* Blue accent */
-  --chart-5: oklch(0.45 0.10 220); /* Dark blue */
+  /* Kaitel color palette for charts in dark mode */
+  --chart-1: oklch(0.80 0.18 340); /* Light magenta */
+  --chart-2: oklch(0.65 0.22 340); /* Kaitel magenta */
+  --chart-3: oklch(0.50 0.20 340); /* Dark magenta */
+  --chart-4: oklch(0.60 0.18 260); /* Kaitel blue */
+  --chart-5: oklch(0.45 0.15 260); /* Dark blue */
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.85 0.005 65);
   --sidebar-accent: oklch(0.274 0.006 286.033);

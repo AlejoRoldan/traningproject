@@ -1,4 +1,5 @@
 import { useAuth } from "@/_core/hooks/useAuth";
+import { Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
   { label: "Escenarios", href: "/scenarios", icon: BookOpen },
   { label: "Mis Simulaciones", href: "/simulations", icon: Target },
   { label: "Biblioteca", href: "/response-library", icon: Library },
+  { label: "Casos Modelo", href: "/casos-modelo", icon: Award },
   { label: "Coaching IA", href: "/coaching", icon: Sparkles },
   { label: "Mi Progreso", href: "/progress", icon: TrendingUp },
   { label: "Gamificación", href: "/gamification", icon: Trophy },

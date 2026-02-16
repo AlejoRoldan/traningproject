@@ -488,3 +488,44 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Crear endpoint getAgentsList para obtener lista de agentes
 - [x] Agregar selectores de filtro en UI de Analytics
 - [x] Probar funcionalidad de filtros (funcionando correctamente)
+
+
+## 🎨 Integración de Identidad Corporativa Kaitel
+
+- [x] Actualizar paleta de colores con rosa/magenta y azul de Kaitel
+- [x] Aplicar colores en header, botones, y elementos clave (index.css actualizado)
+- [x] Actualizar tipografía para alinearse con marca Kaitel
+- [x] Incluir logo de Kaitel en header (K en magenta)
+- [x] Crear tema visual consistente en toda la plataforma
+
+## 📚 Biblioteca de Casos Modelo
+
+- [x] Crear página /casos-modelo para mostrar ejemplos reales
+- [x] Integrar caso 10127833 como primer caso modelo (Tamara Fernanda B)
+- [x] Extraer patrones de buenas prácticas de cada caso
+- [x] Crear análisis de técnicas exitosas por categoría
+- [x] Agregar enlace a casos modelo en menú de navegación
+
+## 🎯 Valores Corporativos en Evaluación
+
+- [ ] Agregar 6 valores corporativos a rubrica de evaluación
+- [ ] Crear puntuación específica por valor demostrado
+- [ ] Incluir feedback que mencione valores aplicados
+- [ ] Actualizar sistema de coaching para reforzar valores
+- [ ] Crear badge/insignias por dominio de cada valor
+
+## 🤝 Alineación del Coaching con Valores Kaitel
+
+- [ ] Actualizar planes de coaching para mencionar valores
+- [ ] Recomendaciones de buddy basadas en valores complementarios
+- [ ] Alertas que destaquen aplicación correcta de valores
+- [ ] Micro-learning vinculado a cada valor corporativo
+- [ ] Tabla de líderes por valor demostrado
+
+## 🚀 Onboarding Corporativo
+
+- [ ] Crear página de bienvenida con misión y visión de Kaitel
+- [ ] Presentar los 6 valores corporativos interactivamente
+- [ ] Explicar cómo valores se manifiestan en trabajo diario
+- [ ] Conectar objetivos de entrenamiento con objetivos corporativos
+- [ ] Incluir video o presentación de líderes de Kaitel (si disponible)
