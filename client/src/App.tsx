@@ -16,6 +16,8 @@ import ResponseLibrary from "./pages/ResponseLibrary";
 import Coaching from "./pages/Coaching";
 import Analytics from "./pages/Analytics";
 import CasosModelo from "./pages/CasosModelo";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminConfig from "./pages/AdminConfig";
 
 function Router() {
   return (
@@ -36,6 +38,8 @@ function Router() {
       <Route path="/coaching" component={Coaching} />
       <Route path="/analytics" component={Analytics} />
       <Route path="/casos-modelo" component={CasosModelo} />
+      <Route path="/admin/dashboard" component={AdminDashboard} />
+      <Route path="/admin/config" component={AdminConfig} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

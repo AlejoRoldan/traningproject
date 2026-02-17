@@ -1051,5 +1051,153 @@ export const appRouter = router({
         }
       }),
   }),
+
+  // Admin router
+  admin: router({
+    // Obtener resumen del dashboard
+    getDashboardSummary: adminProcedure.query(async ({ ctx }) => {
+      try {
+        // Datos de ejemplo - en producción vendría de Supabase
+        // const database = getDb();
+        // Retornar datos de ejemplo por ahora
+        return {
+          total_agents: 156,
+          total_simulations: 2847,
+          avg_score: 78.5,
+          active_coaching_plans: 42,
+          active_alerts: 8,
+          active_buddy_pairs: 31,
+          agents_at_risk: 12,
+        };
+      } catch (error) {
+        console.error('Error fetching dashboard summary:', error);
+        return {
+          total_agents: 0,
+          total_simulations: 0,
+          avg_score: 0,
+          active_coaching_plans: 0,
+          active_alerts: 0,
+          active_buddy_pairs: 0,
+          agents_at_risk: 0,
+        };
+      }
+    }),
+
+    // Obtener configuración
+    getConfig: adminProcedure
+      .input(z.object({ key: z.string() }))
+      .query(async ({ input }) => {
+        // En producción, obtendría de Supabase
+        // Por ahora retorna valores por defecto
+        const configs: Record<string, any> = {
+          company_info: {
+            name: 'Kaitel',
+            mission: 'Empoderar a los agentes de contact center',
+            vision: 'Ser la plataforma líder de capacitación en IA',
+            values: ['Eficiencia', 'Simplicidad', 'Innovación', 'Pasión', 'Confianza', 'Integridad'],
+          },
+          training_settings: {
+            min_simulations_for_coaching: 3,
+            alert_threshold_low_performance: 60,
+            alert_threshold_consecutive_failures: 3,
+            buddy_system_enabled: true,
+            microlearning_enabled: true,
+            voice_recording_enabled: true,
+          },
+          scoring_weights: {
+            empathy: 20,
+            clarity: 20,
+            protocol: 20,
+            resolution: 20,
+            confidence: 20,
+          },
+          performance_targets: {
+            target_score: 85,
+            target_completion_rate: 90,
+            target_improvement_rate: 15,
+          },
+        };
+        
+        return configs[input.key] || {};
+      }),
+
+    // Actualizar configuración
+    updateConfig: adminProcedure
+      .input(z.object({
+        key: z.string(),
+        value: z.record(z.string(), z.any()),
+        reason: z.string().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        // En producción, guardaría en Supabase
+        // Por ahora solo retorna éxito
+        return {
+          success: true,
+          key: input.key,
+          updated_at: new Date(),
+          updated_by: ctx.user.id,
+        };
+      }),
+
+    // Obtener estadísticas por departamento
+    getDepartmentStats: adminProcedure
+      .input(z.object({ department: z.string().optional() }))
+      .query(async ({ input }) => {
+        // Datos de ejemplo - en producción vendría de Supabase
+        return [
+          { department: 'Sales', agents: 45, simulations: 890, avg_score: 82.3, risk: 2 },
+          { department: 'Support', agents: 38, simulations: 756, avg_score: 76.8, risk: 4 },
+          { department: 'Collections', agents: 42, simulations: 834, avg_score: 75.2, risk: 5 },
+          { department: 'Fraud', agents: 31, simulations: 367, avg_score: 81.5, risk: 1 },
+        ];
+      }),
+
+    // Obtener agentes en riesgo
+    getAgentsAtRisk: adminProcedure.query(async ({ ctx }) => {
+      // Datos de ejemplo - en producción vendría de Supabase
+      return [
+        { id: 1, name: 'Carlos Mendez', department: 'Collections', avg_score: 52, risk: 'LOW_PERFORMANCE' },
+        { id: 2, name: 'María García', department: 'Support', avg_score: 58, risk: 'LOW_PERFORMANCE' },
+        { id: 3, name: 'Juan López', department: 'Support', avg_score: 0, risk: 'NO_ACTIVITY' },
+      ];
+    }),
+
+    // Eliminar datos de usuario (GDPR)
+    deleteUserData: adminProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        try {
+          // En producción, llamaría a función GDPR en Supabase
+          return {
+            success: true,
+            userId: input.userId,
+            deleted_at: new Date(),
+            deleted_by: ctx.user.id,
+          };
+        } catch (error) {
+          throw new TRPCError({
+            code: 'INTERNAL_SERVER_ERROR',
+            message: 'Error deleting user data',
+          });
+        }
+      }),
+
+    // Obtener logs de auditoría
+    getAuditLogs: adminProcedure
+      .input(z.object({
+        limit: z.number().default(50),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ input }) => {
+        // Datos de ejemplo - en producción vendría de Supabase
+        return {
+          logs: [],
+          total: 0,
+          limit: input.limit,
+          offset: input.offset,
+        };
+      }),
+  }),
 });
+
 export type AppRouter = typeof appRouter;
