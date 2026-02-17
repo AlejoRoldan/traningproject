@@ -529,3 +529,14 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [ ] Explicar cómo valores se manifiestan en trabajo diario
 - [ ] Conectar objetivos de entrenamiento con objetivos corporativos
 - [ ] Incluir video o presentación de líderes de Kaitel (si disponible)
+
+
+## 🔗 Integración de Supabase
+
+- [x] Configurar credenciales de Supabase de forma segura (SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+- [x] Crear cliente de Supabase en el servidor (supabaseClient.ts)
+- [x] Crear servicio de sincronización (supabaseService.ts)
+- [x] Crear endpoints tRPC para Supabase (getUserStats, getUserSimulations, getLeaderboard, syncSimulation)
+- [x] Actualizar dashboard para usar queries de Supabase
+- [x] Instalar librería @supabase/supabase-js
+- [x] Probar integración y crear checkpoint

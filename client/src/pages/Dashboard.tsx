@@ -23,11 +23,15 @@ export default function Dashboard() {
   const recentSimulationsQuery = trpc.simulations.mySimulations.useQuery({ limit: 5 });
   const activePlanQuery = trpc.improvementPlans.activePlan.useQuery();
   const userBadgesQuery = trpc.user.badges.useQuery();
+  const supabaseStatsQuery = trpc.supabase.getUserStats.useQuery();
+  const supabaseSimulationsQuery = trpc.supabase.getUserSimulations.useQuery();
 
   const stats = userStatsQuery.data;
   const recentSims = recentSimulationsQuery.data || [];
   const activePlan = activePlanQuery.data;
   const badges = userBadgesQuery.data || [];
+  const supabaseStats = supabaseStatsQuery.data;
+  const supabaseSimulations = supabaseSimulationsQuery.data || [];
 
   // Calculate level progress (mock calculation)
   const getLevelProgress = () => {

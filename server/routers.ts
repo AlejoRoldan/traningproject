@@ -1,7 +1,7 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { DEMO_USER } from "./demoUser";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -991,6 +991,64 @@ export const appRouter = router({
           .where(eq(simulations.status, 'completed'));
 
         return results.map(r => r.userId);
+      }),
+  }),
+  supabase: router({
+    getUserStats: protectedProcedure
+      .query(async ({ ctx }) => {
+        try {
+          const { getUserStatsFromSupabase } = await import('./supabaseService');
+          return await getUserStatsFromSupabase(ctx.user.id);
+        } catch (error) {
+          console.error('Error fetching user stats from Supabase:', error);
+          return null;
+        }
+      }),
+    
+    getUserSimulations: protectedProcedure
+      .query(async ({ ctx }) => {
+        try {
+          const { getUserSimulationsFromSupabase } = await import('./supabaseService');
+          return await getUserSimulationsFromSupabase(ctx.user.id);
+        } catch (error) {
+          console.error('Error fetching user simulations from Supabase:', error);
+          return [];
+        }
+      }),
+    
+    getLeaderboard: publicProcedure
+      .input(z.object({ limit: z.number().default(10) }))
+      .query(async ({ input }) => {
+        try {
+          const { getLeaderboardFromSupabase } = await import('./supabaseService');
+          return await getLeaderboardFromSupabase(input.limit);
+        } catch (error) {
+          console.error('Error fetching leaderboard from Supabase:', error);
+          return [];
+        }
+      }),
+    
+    syncSimulation: protectedProcedure
+      .input(z.object({
+        scenarioId: z.number(),
+        categoryId: z.number(),
+        overallScore: z.number(),
+        duration: z.number(),
+        feedback: z.string(),
+        categoryScores: z.record(z.string(), z.number()),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        try {
+          const { syncSimulationToSupabase } = await import('./supabaseService');
+          return await syncSimulationToSupabase({
+            userId: ctx.user.id,
+            ...input,
+            completedAt: new Date(),
+          });
+        } catch (error) {
+          console.error('Error syncing simulation to Supabase:', error);
+          return null;
+        }
       }),
   }),
 });
