@@ -350,3 +350,51 @@ export const learningProgress = mysqlTable("learning_progress", {
 
 export type LearningProgress = typeof learningProgress.$inferSelect;
 export type InsertLearningProgress = typeof learningProgress.$inferInsert;
+
+
+// Admin Feedback table - Messages from admins to agents
+export const adminFeedback = mysqlTable("admin_feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  fromAdminId: int("from_admin_id").notNull(),
+  toAgentId: int("to_agent_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  feedbackType: mysqlEnum("feedback_type", ["note", "praise", "improvement", "urgent", "follow_up"]).default("note").notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high"]).default("medium").notNull(),
+  isRead: int("is_read").default(0).notNull(), // boolean as int
+  readAt: timestamp("read_at"),
+  isArchived: int("is_archived").default(0).notNull(), // boolean as int
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AdminFeedback = typeof adminFeedback.$inferSelect;
+export type InsertAdminFeedback = typeof adminFeedback.$inferInsert;
+
+// Feedback Replies table - Responses to feedback
+export const feedbackReplies = mysqlTable("feedback_replies", {
+  id: int("id").autoincrement().primaryKey(),
+  feedbackId: int("feedback_id").notNull(),
+  fromUserId: int("from_user_id").notNull(),
+  message: text("message").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FeedbackReply = typeof feedbackReplies.$inferSelect;
+export type InsertFeedbackReply = typeof feedbackReplies.$inferInsert;
+
+// Feedback Attachments table - Files attached to feedback
+export const feedbackAttachments = mysqlTable("feedback_attachments", {
+  id: int("id").autoincrement().primaryKey(),
+  feedbackId: int("feedback_id").notNull(),
+  fileName: varchar("file_name", { length: 255 }).notNull(),
+  fileUrl: varchar("file_url", { length: 512 }).notNull(),
+  fileType: varchar("file_type", { length: 50 }),
+  fileSize: int("file_size"),
+  uploadedBy: int("uploaded_by").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type FeedbackAttachment = typeof feedbackAttachments.$inferSelect;
+export type InsertFeedbackAttachment = typeof feedbackAttachments.$inferInsert;

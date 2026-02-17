@@ -43,9 +43,9 @@ export default function Analytics() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los agentes</SelectItem>
-              {agentsList?.map((agentId) => (
-                <SelectItem key={agentId} value={agentId.toString()}>
-                  Agente {agentId}
+              {agentsList?.map((agent: any) => (
+                <SelectItem key={agent.id} value={agent.id.toString()}>
+                  {agent.name || `Agente ${agent.id}`}
                 </SelectItem>
               ))}
             </SelectContent>

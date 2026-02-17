@@ -571,3 +571,15 @@ Todas las funcionalidades solicitadas han sido implementadas y probadas exitosam
 - [x] Instalar librería @supabase/supabase-js
 - [x] Crear esquema SQL enterprise-grade con GDPR y auditoría
 - [x] Crear guía de implementación paso a paso
+
+
+## 💬 Sistema de Feedback y Notas
+
+- [ ] Crear tabla admin_feedback en base de datos
+- [ ] Crear tabla feedback_attachments para archivos adjuntos
+- [ ] Crear endpoints tRPC para enviar/recibir feedback
+- [ ] Crear componente modal para enviar feedback desde admin dashboard
+- [ ] Crear página de Inbox de feedback para agentes
+- [ ] Integrar notificaciones en tiempo real
+- [ ] Agregar contador de mensajes no leídos
+- [ ] Crear búsqueda y filtros en inbox

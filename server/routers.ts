@@ -11,7 +11,7 @@ import { generateSpeech, detectGenderFromProfile } from "./ttsService";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { getDb } from "./db";
-import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates } from "../drizzle/schema";
+import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates, users } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, isNotNull, or } from "drizzle-orm";
 
 // Demo user procedure (no authentication required)
@@ -984,13 +984,16 @@ export const appRouter = router({
         if (!db) throw new Error('Database connection failed');
 
         const results = await db
-          .selectDistinct({
-            userId: simulations.userId,
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
           })
-          .from(simulations)
-          .where(eq(simulations.status, 'completed'));
+          .from(users)
+          .where(eq(users.role, 'agente'))
+          .limit(100);
 
-        return results.map(r => r.userId);
+        return results;
       }),
   }),
   supabase: router({
@@ -1196,6 +1199,101 @@ export const appRouter = router({
           limit: input.limit,
           offset: input.offset,
         };
+      }),
+  }),
+
+  // Feedback endpoints
+  feedback: router({
+    send: protectedProcedure
+      .input(z.object({
+        toAgentId: z.number(),
+        title: z.string().min(1).max(255),
+        message: z.string().min(1),
+        feedbackType: z.enum(['note', 'praise', 'improvement', 'urgent', 'follow_up']),
+        priority: z.enum(['low', 'medium', 'high']),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin' && ctx.user.role !== 'supervisor' && ctx.user.role !== 'gerente') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+        const { sendFeedback } = await import('./feedbackService');
+        const result = await sendFeedback(ctx.user.id, input);
+        return result;
+      }),
+
+    getReceived: protectedProcedure
+      .input(z.object({
+        limit: z.number().default(50),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        const { getAgentFeedback } = await import('./feedbackService');
+        return await getAgentFeedback(ctx.user.id, input.limit, input.offset);
+      }),
+
+    getSent: protectedProcedure
+      .input(z.object({
+        limit: z.number().default(50),
+        offset: z.number().default(0),
+      }))
+      .query(async ({ ctx, input }) => {
+        if (ctx.user.role !== 'admin' && ctx.user.role !== 'supervisor' && ctx.user.role !== 'gerente') {
+          throw new TRPCError({ code: 'FORBIDDEN' });
+        }
+        const { getAdminSentFeedback } = await import('./feedbackService');
+        return await getAdminSentFeedback(ctx.user.id, input.limit, input.offset);
+      }),
+
+    markAsRead: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { markFeedbackAsRead } = await import('./feedbackService');
+        return await markFeedbackAsRead(input.feedbackId);
+      }),
+
+    getUnreadCount: protectedProcedure
+      .query(async ({ ctx }) => {
+        const { getUnreadFeedbackCount } = await import('./feedbackService');
+        return await getUnreadFeedbackCount(ctx.user.id);
+      }),
+
+    addReply: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+        message: z.string().min(1),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const { addFeedbackReply } = await import('./feedbackService');
+        return await addFeedbackReply(input.feedbackId, ctx.user.id, input.message);
+      }),
+
+    getReplies: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { getFeedbackReplies } = await import('./feedbackService');
+        return await getFeedbackReplies(input.feedbackId);
+      }),
+
+    archive: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const { archiveFeedback } = await import('./feedbackService');
+        return await archiveFeedback(input.feedbackId);
+      }),
+
+    getDetail: protectedProcedure
+      .input(z.object({
+        feedbackId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { getFeedbackDetail } = await import('./feedbackService');
+        return await getFeedbackDetail(input.feedbackId);
       }),
   }),
 });
