@@ -14,6 +14,8 @@ import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates, users } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, isNotNull, or } from "drizzle-orm";
 
+
+
 // Demo user procedure (no authentication required)
 const demoUserProcedure = publicProcedure.use(({ ctx, next }) => {
   // Use authenticated user if available, otherwise use demo user
@@ -1296,6 +1298,7 @@ export const appRouter = router({
         return await getFeedbackDetail(input.feedbackId);
       }),
   }),
+  
 });
 
 export type AppRouter = typeof appRouter;
