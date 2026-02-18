@@ -344,3 +344,53 @@ Este proyecto es propietario y confidencial. Todos los derechos reservados.
 ---
 
 **¿Preguntas o problemas?** Abre un issue en este repositorio o contacta al equipo de desarrollo.
+
+## 🚀 Deployment
+
+Para desplegar la aplicación en staging o producción, consulta los siguientes documentos:
+
+### Documentación de Deployment
+
+- **[ENVIRONMENT_GUIDE.md](./ENVIRONMENT_GUIDE.md)** - Guía completa de variables de entorno (10 requeridas + 10 opcionales)
+- **[ENV_REFERENCE.md](./ENV_REFERENCE.md)** - Plantillas de `.env` para cada entorno
+- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Checklist detallado pre/durante/post deployment
+
+### Validación de Variables de Entorno
+
+Antes de iniciar el servidor, valida que todas las variables estén configuradas correctamente:
+
+```bash
+# Desarrollo
+node scripts/validate-env.mjs
+
+# Staging
+NODE_ENV=staging node scripts/validate-env.mjs
+
+# Producción
+NODE_ENV=production node scripts/validate-env.mjs
+```
+
+### Estructura de Servidor Reorganizada
+
+El servidor ahora tiene estructura clara y escalable:
+
+```
+server/
+├── _core/              # Núcleo del servidor
+│   ├── env.ts         # Validación de variables de entorno
+│   ├── rateLimiter.ts # Rate limiting para APIs
+│   └── ...
+├── db/                # Base de datos
+│   ├── index.ts       # Queries y helpers
+│   ├── schema.ts      # Schema de Drizzle
+│   └── migrations/    # Migraciones
+├── services/          # Servicios de negocio
+│   ├── evaluationService.ts
+│   ├── voiceAnalysisService.ts
+│   ├── ttsService.ts
+│   ├── coachingService.ts
+│   └── ...
+└── routers.ts         # Procedimientos tRPC
+```
+
+---
