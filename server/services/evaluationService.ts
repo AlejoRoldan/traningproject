@@ -1,6 +1,7 @@
 import { invokeLLM } from '../_core/llm';
-import { generateStructuredResponse, generateChatCompletion, type ChatMessage } from '../openaiService';
+import { buildClientSystemPrompt } from './distressPromptService';
 import type { Scenario } from '../../drizzle/schema';
+import { evaluationLogger } from '../_core/logger';
 
 interface Message {
   role: "agent" | "client" | "system";
@@ -24,9 +25,21 @@ interface EvaluationResult {
   badgesEarned: string[];
 }
 
-// Check if OpenAI API key is configured
-const useOpenAI = !!process.env.OPENAI_API_KEY;
+/**
+ * Generar respuesta del cliente con nivel de estrés
+ */
+export async function generateClientResponseWithDistress(
+  scenario: Scenario,
+  conversationHistory: Message[],
+  lastAgentMessage: string,
+  distressLevel: number
+): Promise<string> {
+  return generateClientResponse(scenario, conversationHistory, lastAgentMessage, distressLevel);
+}
 
+/**
+ * Evaluar simulación usando Gemini
+ */
 export async function evaluateSimulation(
   scenario: Scenario,
   messages: Message[]
@@ -113,97 +126,56 @@ ${conversationTranscript}
 Evalúa el desempeño del agente basándote en la transcripción anterior y los criterios establecidos.`;
 
   try {
-    let evaluationData;
-
-    if (useOpenAI) {
-      // Use OpenAI API
-      const messages: ChatMessage[] = [
+    // Usar Gemini para evaluación estructurada
+    const response = await invokeLLM({
+      messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
-      ];
-
-      evaluationData = await generateStructuredResponse(messages, {
-        name: "evaluation_result",
-        schema: {
-          type: "object",
-          properties: {
-            empathy: { type: "number" },
-            clarity: { type: "number" },
-            protocol: { type: "number" },
-            resolution: { type: "number" },
-            confidence: { type: "number" },
-            feedback: { type: "string" },
-            strengths: {
-              type: "array",
-              items: { type: "string" }
-            },
-            weaknesses: {
-              type: "array",
-              items: { type: "string" }
-            },
-            recommendations: {
-              type: "array",
-              items: { type: "string" }
-            }
-          },
-          required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
-          additionalProperties: false
-        }
-      });
-    } else {
-      // Use Manus built-in LLM
-      const response = await invokeLLM({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "evaluation_result",
-            strict: true,
-            schema: {
-              type: "object",
-              properties: {
-                empathy: { type: "number" },
-                clarity: { type: "number" },
-                protocol: { type: "number" },
-                resolution: { type: "number" },
-                confidence: { type: "number" },
-                feedback: { type: "string" },
-                strengths: {
-                  type: "array",
-                  items: { type: "string" }
-                },
-                weaknesses: {
-                  type: "array",
-                  items: { type: "string" }
-                },
-                recommendations: {
-                  type: "array",
-                  items: { type: "string" }
-                }
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "evaluation_result",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              empathy: { type: "number" },
+              clarity: { type: "number" },
+              protocol: { type: "number" },
+              resolution: { type: "number" },
+              confidence: { type: "number" },
+              feedback: { type: "string" },
+              strengths: {
+                type: "array",
+                items: { type: "string" }
               },
-              required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
-              additionalProperties: false
-            }
+              weaknesses: {
+                type: "array",
+                items: { type: "string" }
+              },
+              recommendations: {
+                type: "array",
+                items: { type: "string" }
+              }
+            },
+            required: ["empathy", "clarity", "protocol", "resolution", "confidence", "feedback", "strengths", "weaknesses", "recommendations"],
+            additionalProperties: false
           }
         }
-      });
+      }
+    });
 
-      const content = response.choices[0].message.content;
-      evaluationData = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
-    }
+    const content = response.choices[0].message.content;
+    const evaluationData = JSON.parse(typeof content === 'string' ? content : JSON.stringify(content));
 
     // Calculate weighted overall score
-    // Ensure evaluation criteria values are valid numbers
     const empathyWeight = Number(evaluationCriteria.empathy) || 20;
     const clarityWeight = Number(evaluationCriteria.clarity) || 20;
     const protocolWeight = Number(evaluationCriteria.protocol) || 20;
     const resolutionWeight = Number(evaluationCriteria.resolution) || 20;
-    const confidenceWeight = 20; // Fixed 20% weight
+    const confidenceWeight = 20;
 
-    // Normalize weights to ensure they sum to 100
     const totalWeight = empathyWeight + clarityWeight + protocolWeight + resolutionWeight + confidenceWeight;
     const weights = {
       empathy: empathyWeight / totalWeight,
@@ -213,14 +185,12 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
       confidence: confidenceWeight / totalWeight
     };
 
-    // Ensure all values are valid numbers with fallback to 75
     const empathy = Number(evaluationData.empathy) || 75;
     const clarity = Number(evaluationData.clarity) || 75;
     const protocol = Number(evaluationData.protocol) || 75;
     const resolution = Number(evaluationData.resolution) || 75;
     const confidence = Number(evaluationData.confidence) || 75;
 
-    // Calculate overall score with validation
     const rawOverallScore = 
       empathy * weights.empathy +
       clarity * weights.clarity +
@@ -228,22 +198,46 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
       resolution * weights.resolution +
       confidence * weights.confidence;
 
-    // Ensure overallScore is a valid number
     const overallScore = Number.isFinite(rawOverallScore) ? Math.round(rawOverallScore) : 75;
 
-    // Calculate points earned based on score and complexity
+    // Calculate points earned
     const complexity = Number(scenario.complexity) || 1;
-    const basePoints = Math.round(overallScore * complexity);
-    const bonusPoints = overallScore >= 90 ? 50 : overallScore >= 80 ? 25 : 0;
-    const pointsEarned = Number.isFinite(basePoints + bonusPoints) ? basePoints + bonusPoints : 0;
+    const basePoints = 50;
+    const complexityMultiplier = complexity * 10;
+    const bonusPoints = overallScore >= 90 ? 50 : overallScore >= 80 ? 25 : overallScore >= 70 ? 10 : 0;
+    const pointsEarned = Number.isFinite(basePoints + complexityMultiplier + bonusPoints) ? basePoints + complexityMultiplier + bonusPoints : 0;
 
     // Determine badges earned
     const badgesEarned: string[] = [];
-    if (evaluationData.empathy >= 90) badgesEarned.push("empathy_pro");
-    if (evaluationData.protocol >= 95) badgesEarned.push("protocol_master");
-    if (evaluationData.resolution >= 90) badgesEarned.push("problem_solver");
-    if (scenario.complexity >= 4 && overallScore >= 85) badgesEarned.push("crisis_handler");
-    if (overallScore >= 95) badgesEarned.push("excellence_award");
+    
+    if (complexity >= 3 && overallScore >= 85) {
+      badgesEarned.push("crisis_handler");
+    }
+    
+    if (overallScore >= 95) {
+      badgesEarned.push("perfectionist");
+    }
+    
+    if (overallScore >= 80) {
+      badgesEarned.push("fast_responder");
+    }
+    
+    if (evaluationData.empathy >= 90) {
+      badgesEarned.push("empathy_pro");
+    }
+    
+    if (evaluationData.protocol >= 95) {
+      badgesEarned.push("protocol_master");
+    }
+    
+    if (evaluationData.resolution >= 90) {
+      badgesEarned.push("problem_solver");
+    }
+
+    evaluationLogger.info(
+      { overallScore, complexity, pointsEarned, badgesEarned },
+      'Evaluación completada con Gemini'
+    );
 
     return {
       overallScore,
@@ -263,9 +257,9 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
     };
 
   } catch (error) {
-    console.error("Error en evaluación con GPT:", error);
+    evaluationLogger.error({ err: error }, 'Error en evaluación con Gemini');
     
-    // Fallback evaluation if GPT fails
+    // Fallback evaluation
     return {
       overallScore: 75,
       categoryScores: {
@@ -285,10 +279,14 @@ Evalúa el desempeño del agente basándote en la transcripción anterior y los 
   }
 }
 
+/**
+ * Generar respuesta del cliente usando Gemini
+ */
 export async function generateClientResponse(
   scenario: Scenario,
   conversationHistory: Message[],
-  lastAgentMessage: string
+  lastAgentMessage: string,
+  distressLevel: number = 3
 ): Promise<string> {
   
   const clientProfile = JSON.parse(scenario.clientProfile);
@@ -296,21 +294,11 @@ export async function generateClientResponse(
     .map(m => `[${m.role.toUpperCase()}]: ${m.content}`)
     .join("\n");
 
-  const systemPrompt = `${scenario.systemPrompt}
-
-PERFIL DEL CLIENTE:
-- Emoción: ${clientProfile.emotion}
-- Contexto: ${clientProfile.initialContext}
-
-INSTRUCCIONES:
-- Responde como el cliente descrito en el perfil
-- Mantén la emoción y personalidad consistentes
-- Sé realista y natural en tus respuestas
-- Si el agente resuelve bien tu problema, muestra satisfacción
-- Si el agente no sigue el protocolo o no te ayuda bien, muestra frustración
-- Mantén respuestas breves (1-3 oraciones)
-- No repitas información que ya diste
-- Responde en español de Paraguay`;
+  const systemPrompt = buildClientSystemPrompt(
+    scenario.systemPrompt,
+    clientProfile,
+    distressLevel
+  );
 
   const userPrompt = `CONVERSACIÓN HASTA AHORA:
 ${conversationTranscript}
@@ -320,37 +308,27 @@ ${conversationTranscript}
 Responde como el cliente. Tu respuesta:`;
 
   try {
-    let responseText: string;
-
-    if (useOpenAI) {
-      // Use OpenAI API
-      const messages: ChatMessage[] = [
+    // Usar Gemini para generar respuesta del cliente
+    const response = await invokeLLM({
+      messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt }
-      ];
+      ],
+      maxTokens: 150
+    });
 
-      responseText = await generateChatCompletion(messages, {
-        model: 'gpt-4o',
-        temperature: 0.8,
-        maxTokens: 150
-      });
-    } else {
-      // Use Manus built-in LLM
-      const response = await invokeLLM({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt }
-        ]
-      });
+    const content = response.choices[0].message.content;
+    const responseText = (typeof content === 'string' ? content : JSON.stringify(content)).trim();
 
-      const content = response.choices[0].message.content;
-      responseText = (typeof content === 'string' ? content : JSON.stringify(content)).trim();
-    }
+    evaluationLogger.info(
+      { distressLevel, responseLength: responseText.length },
+      'Respuesta del cliente generada con Gemini'
+    );
 
     return responseText.trim();
     
   } catch (error) {
-    console.error("Error generando respuesta del cliente:", error);
+    evaluationLogger.error({ err: error, distressLevel }, 'Error generando respuesta del cliente con Gemini');
     return "Entiendo. ¿Hay algo más que puedas hacer para ayudarme?";
   }
 }

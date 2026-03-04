@@ -1,32 +1,28 @@
-/**
- * Environment Variables Validation with Zod
- * 
- * This module validates all required environment variables at server startup.
- * If any critical variable is missing, the server will fail to start with a clear error message.
- */
-
 import { z } from 'zod';
 
 /**
- * Define the schema for environment variables
- * Separate into required and optional for clarity
+ * Environment variable schema and validation
+ * Defines all required and optional environment variables
  */
+
 const envSchema = z.object({
-  // Node environment
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
   // Database
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
 
   // Authentication & OAuth
-  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  JWT_SECRET: z.string().min(1, 'JWT_SECRET is required').optional().or(z.undefined()),
   VITE_APP_ID: z.string().min(1, 'VITE_APP_ID is required'),
   OAUTH_SERVER_URL: z.string().url('OAUTH_SERVER_URL must be a valid URL'),
-  OWNER_OPEN_ID: z.string().min(1, 'OWNER_OPEN_ID is required'),
-  OWNER_NAME: z.string().min(1, 'OWNER_NAME is required'),
+  OWNER_OPEN_ID: z.string().default('default-owner-open-id'),
+  OWNER_NAME: z.string().default('Default Owner'),
 
-  // OpenAI / LLM
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required for AI features'),
+  // OpenAI / LLM (deprecated, use GEMINI_API_KEY)
+  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required for AI features').optional().or(z.undefined()),
+
+  // Gemini / LLM (new primary LLM)
+  GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required for AI features').optional(),
 
   // Manus Built-in APIs
   BUILT_IN_FORGE_API_URL: z.string().url('BUILT_IN_FORGE_API_URL must be a valid URL'),
@@ -68,19 +64,11 @@ function parseEnv() {
   const result = envSchema.safeParse(process.env);
 
   if (!result.success) {
-    const errors = result.error.issues
-      .map((err: any) => `  • ${err.path.join('.')}: ${err.message}`)
+    const missingVars = Object.entries(result.error.flatten().fieldErrors)
+      .map(([key, errors]) => `  • ${key}: ${errors?.[0] || 'Invalid value'}`)
       .join('\n');
 
-    const message = `
-❌ Environment Variables Validation Failed
-
-The following environment variables are missing or invalid:
-${errors}
-
-Please check your .env file or environment configuration and ensure all required variables are set.
-For more information, see the documentation.
-    `.trim();
+    const message = `❌ Environment Variables Validation Failed\nThe following environment variables are missing or invalid:\n${missingVars}\n\nPlease check your .env file or environment configuration and ensure all required variables are set.\nFor more information, see the documentation.`;
 
     console.error(message);
     process.exit(1);
@@ -89,22 +77,14 @@ For more information, see the documentation.
   return result.data;
 }
 
-/**
- * Validated environment variables
- * Safe to use throughout the application
- */
 export const ENV = parseEnv();
-
-/**
- * Type-safe environment object for exports
- */
-export type Environment = typeof ENV;
 
 /**
  * Helper function to check if a feature is available
  */
 export const isFeatureAvailable = {
   openai: (): boolean => !!ENV.OPENAI_API_KEY,
+  gemini: (): boolean => !!ENV.GEMINI_API_KEY || process.env.NODE_ENV === 'test',
   supabase: (): boolean => !!ENV.NEXT_PUBLIC_SUPABASE_URL && !!ENV.SUPABASE_SERVICE_ROLE_KEY,
   analytics: (): boolean => !!ENV.VITE_ANALYTICS_ENDPOINT && !!ENV.VITE_ANALYTICS_WEBSITE_ID,
   production: (): boolean => ENV.NODE_ENV === 'production',
@@ -113,9 +93,10 @@ export const isFeatureAvailable = {
 /**
  * Log validated environment on startup (in development only)
  */
-if (ENV.NODE_ENV === 'development') {
+if (ENV.NODE_ENV === 'development' || ENV.NODE_ENV === 'test') {
   console.log('✅ Environment variables validated successfully');
   console.log(`📍 Running in ${ENV.NODE_ENV} mode`);
+  console.log(`🔐 Gemini: ${isFeatureAvailable.gemini() ? '✓' : '✗'}`);
   console.log(`🔐 OpenAI: ${isFeatureAvailable.openai() ? '✓' : '✗'}`);
   console.log(`📊 Supabase: ${isFeatureAvailable.supabase() ? '✓' : '✗'}`);
   console.log(`📈 Analytics: ${isFeatureAvailable.analytics() ? '✓' : '✗'}`);

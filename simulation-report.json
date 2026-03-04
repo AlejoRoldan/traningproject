@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-03-04T22:08:05.531Z",
+  "scenario": {
+    "title": "Reporte de Fraude Bancario - Tarjeta de Crédito",
+    "category": "fraud",
+    "complexity": 4
+  },
+  "evaluation": {
+    "overallScore": 75,
+    "categoryScores": {
+      "empathy": 75,
+      "clarity": 75,
+      "protocol": 75,
+      "resolution": 75,
+      "confidence": 75
+    },
+    "feedback": "La evaluación automática no pudo completarse. Por favor, consulta con tu supervisor para una evaluación manual.",
+    "strengths": [
+      "Completaste la simulación"
+    ],
+    "weaknesses": [
+      "No se pudo generar evaluación detallada"
+    ],
+    "recommendations": [
+      "Intenta realizar la simulación nuevamente"
+    ],
+    "pointsEarned": 50,
+    "badgesEarned": []
+  },
+  "conversationLength": 10,
+  "agentMessages": 5,
+  "clientMessages": 5
+}

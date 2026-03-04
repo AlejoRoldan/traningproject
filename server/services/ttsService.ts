@@ -1,99 +1,46 @@
-import OpenAI from "openai";
-import { invokeLLM } from '../_core/llm';
+import { ttsLogger } from '../_core/logger';
+import { synthesizeSpeechWithGemini, selectGeminiVoice } from '../_core/gemini';
 
 /**
- * Servicio de Text-to-Speech usando OpenAI TTS API
+ * Servicio de Text-to-Speech usando Google Cloud TTS (via Gemini API Key)
  * Genera audio realista para las respuestas del cliente durante simulaciones
  */
 
-// Voces disponibles en OpenAI TTS
-// alloy: neutral, nova: femenina joven, shimmer: femenina suave
-// echo: masculina, fable: masculina británica, onyx: masculina profunda
-type TTSVoice = "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
-
 interface TTSOptions {
   text: string;
-  voice?: TTSVoice;
   gender?: "male" | "female";
-  speed?: number; // 0.25 to 4.0
+  speed?: number; // 0.25 to 4.0 (no soportado directamente en Google TTS)
+  region?: string; // es_ES, es_MX, es_US
 }
 
 /**
- * Selecciona la voz apropiada según el género del cliente
- */
-function selectVoice(gender?: "male" | "female"): TTSVoice {
-  if (gender === "female") {
-    // Alternar entre voces femeninas para variedad
-    const femaleVoices: TTSVoice[] = ["nova", "shimmer"];
-    return femaleVoices[Math.floor(Math.random() * femaleVoices.length)];
-  } else if (gender === "male") {
-    // Alternar entre voces masculinas
-    const maleVoices: TTSVoice[] = ["echo", "fable", "onyx"];
-    return maleVoices[Math.floor(Math.random() * maleVoices.length)];
-  }
-  // Por defecto, voz neutral
-  return "alloy";
-}
-
-/**
- * Genera audio usando OpenAI TTS API
+ * Genera audio usando Google Cloud Text-to-Speech
  * @returns Buffer con el audio en formato MP3
  */
 export async function generateSpeech(options: TTSOptions): Promise<Buffer> {
-  const { text, voice, gender, speed = 1.0 } = options;
+  const { text, gender = "female", region = "es_ES" } = options;
 
-  // Usar OpenAI si está configurado
-  if (process.env.OPENAI_API_KEY) {
-    try {
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+  try {
+    // Seleccionar voz según género y región
+    const voiceName = selectGeminiVoice(gender, region);
 
-      const selectedVoice = voice || selectVoice(gender);
+    // Generar síntesis de voz
+    const audioBuffer = await synthesizeSpeechWithGemini(
+      text,
+      region === "es_MX" ? "es-MX" : region === "es_US" ? "es-US" : "es-ES",
+      voiceName
+    );
 
-      const response = await openai.audio.speech.create({
-        model: "tts-1", // tts-1 es más rápido, tts-1-hd es mejor calidad
-        voice: selectedVoice,
-        input: text,
-        speed: speed,
-      });
+    ttsLogger.info(
+      { textLength: text.length, voiceName, region },
+      "Speech generated successfully"
+    );
 
-      // Convertir response a Buffer
-      const arrayBuffer = await response.arrayBuffer();
-      return Buffer.from(arrayBuffer);
-    } catch (error) {
-      console.error("[TTS] Error generating speech with OpenAI:", error);
-      throw new Error("Failed to generate speech");
-    }
+    return audioBuffer;
+  } catch (error) {
+    ttsLogger.error({ err: error }, "Error generating speech with Gemini");
+    throw new Error("Failed to generate speech");
   }
-
-  // Fallback: generar audio silencioso si no hay API key
-  // En producción, esto debería usar un servicio alternativo o retornar error
-  console.warn("[TTS] OPENAI_API_KEY not configured, returning silent audio");
-  return generateSilentAudio(text.length);
-}
-
-/**
- * Genera un buffer de audio silencioso como fallback
- * Útil para desarrollo sin API key
- */
-function generateSilentAudio(textLength: number): Buffer {
-  // Calcular duración aproximada (150 palabras por minuto)
-  const words = textLength / 5; // Aproximadamente 5 caracteres por palabra
-  const durationSeconds = (words / 150) * 60;
-
-  // Generar MP3 silencioso simple (header mínimo)
-  // En producción real, usar una biblioteca como `ffmpeg` para generar audio válido
-  const silentMp3Header = Buffer.from([
-    0xff,
-    0xfb,
-    0x90,
-    0x00, // MP3 header
-  ]);
-
-  // Repetir para aproximar la duración
-  const frames = Math.ceil(durationSeconds * 38.28); // ~38.28 frames por segundo
-  return Buffer.concat(Array(frames).fill(silentMp3Header));
 }
 
 /**
@@ -142,3 +89,12 @@ export function detectGenderFromProfile(clientProfile: any): "male" | "female" {
   // Por defecto, alternar aleatoriamente
   return Math.random() > 0.5 ? "female" : "male";
 }
+
+/**
+ * Voces disponibles por región
+ */
+export const AVAILABLE_REGIONS = {
+  es_ES: "España",
+  es_MX: "México",
+  es_US: "Estados Unidos",
+};
