@@ -21,8 +21,14 @@ const envSchema = z.object({
   // OpenAI / LLM (deprecated, use GEMINI_API_KEY)
   OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required for AI features').optional().or(z.undefined()),
 
-  // Gemini / LLM (new primary LLM)
+  // Gemini / LLM (fallback LLM)
   GEMINI_API_KEY: z.string().min(1, 'GEMINI_API_KEY is required for AI features').optional(),
+
+  // Anthropic / Claude (primary LLM for production)
+  ANTHROPIC_API_KEY: z.string().min(1, 'ANTHROPIC_API_KEY is required for Claude AI features').optional(),
+
+  // AI Provider selection: 'anthropic' | 'gemini' (default: 'anthropic' if key is set)
+  AI_PROVIDER: z.enum(['anthropic', 'gemini']).optional(),
 
   // Manus Built-in APIs
   BUILT_IN_FORGE_API_URL: z.string().url('BUILT_IN_FORGE_API_URL must be a valid URL'),
@@ -85,6 +91,7 @@ export const ENV = parseEnv();
 export const isFeatureAvailable = {
   openai: (): boolean => !!ENV.OPENAI_API_KEY,
   gemini: (): boolean => !!ENV.GEMINI_API_KEY || process.env.NODE_ENV === 'test',
+  anthropic: (): boolean => !!ENV.ANTHROPIC_API_KEY,
   supabase: (): boolean => !!ENV.NEXT_PUBLIC_SUPABASE_URL && !!ENV.SUPABASE_SERVICE_ROLE_KEY,
   analytics: (): boolean => !!ENV.VITE_ANALYTICS_ENDPOINT && !!ENV.VITE_ANALYTICS_WEBSITE_ID,
   production: (): boolean => ENV.NODE_ENV === 'production',
@@ -96,8 +103,10 @@ export const isFeatureAvailable = {
 if (ENV.NODE_ENV === 'development' || ENV.NODE_ENV === 'test') {
   console.log('✅ Environment variables validated successfully');
   console.log(`📍 Running in ${ENV.NODE_ENV} mode`);
+  console.log(`🤖 Anthropic (Claude): ${isFeatureAvailable.anthropic() ? '✓' : '✗'}`);
   console.log(`🔐 Gemini: ${isFeatureAvailable.gemini() ? '✓' : '✗'}`);
   console.log(`🔐 OpenAI: ${isFeatureAvailable.openai() ? '✓' : '✗'}`);
+   console.log(`⚡ AI Provider: ${ENV.AI_PROVIDER ?? (isFeatureAvailable.anthropic() ? 'anthropic (auto)' : 'gemini (auto)')}`);
   console.log(`📊 Supabase: ${isFeatureAvailable.supabase() ? '✓' : '✗'}`);
   console.log(`📈 Analytics: ${isFeatureAvailable.analytics() ? '✓' : '✗'}`);
 }
