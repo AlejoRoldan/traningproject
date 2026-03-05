@@ -31,17 +31,17 @@ export default function Team() {
   const getLevelColor = (level: string | null) => {
     switch (level) {
       case "expert": return "text-primary";
-      case "senior": return "text-purple-600 dark:text-purple-400";
-      case "intermediate": return "text-blue-600 dark:text-blue-400";
-      default: return "text-gray-600 dark:text-gray-400";
+      case "senior": return "text-chart-2";
+      case "intermediate": return "text-chart-4";
+      default: return "text-muted-foreground";
     }
   };
 
   const getPerformanceStatus = (avgScore: number) => {
-    if (avgScore >= 85) return { label: "Excelente", color: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20", icon: CheckCircle2 };
-    if (avgScore >= 70) return { label: "Bueno", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20", icon: TrendingUp };
-    if (avgScore >= 60) return { label: "Regular", color: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20", icon: Target };
-    return { label: "Necesita Apoyo", color: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20", icon: AlertTriangle };
+    if (avgScore >= 85) return { label: "Excelente", color: "bg-primary/10 text-primary border-primary/20", icon: CheckCircle2 };
+    if (avgScore >= 70) return { label: "Bueno", color: "bg-chart-4/10 text-chart-4 border-chart-4/20", icon: TrendingUp };
+    if (avgScore >= 60) return { label: "Regular", color: "bg-chart-2/10 text-chart-2 border-chart-2/20", icon: Target };
+    return { label: "Necesita Apoyo", color: "bg-destructive/10 text-destructive border-destructive/20", icon: AlertTriangle };
   };
 
   // Calculate team averages (mock data for now)
@@ -51,73 +51,78 @@ export default function Team() {
 
   return (
     <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Mi Equipo</h1>
-          <p className="text-muted-foreground mt-1">
-            Monitorea el progreso y desempeño de tu equipo
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Mi Equipo</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Monitorea el progreso y desempeño de tu equipo
+            </p>
+          </div>
 
-        {/* Team Overview Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-primary">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Total de Agentes
+          {/* Team Overview Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Total
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{teamMembers.length}</div>
-              <p className="text-xs text-muted-foreground mt-1">Miembros activos</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">{teamMembers.length}</div>
+              <p className="text-sm text-muted-foreground">Miembros activos</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Promedio del Equipo
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-2 to-chart-2/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-chart-2" />
+                Promedio
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">{teamAverage}%</div>
-              <p className="text-xs text-muted-foreground mt-1">Puntuación general</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">{teamAverage}%</div>
+              <p className="text-sm text-muted-foreground">Puntuación general</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Simulaciones Totales
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-4 to-chart-4/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Target className="w-4 h-4 text-chart-4" />
+                Simulaciones
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">
                 {teamStats && teamStats.length > 0 ? teamStats[0].totalSimulations : 0}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Esta semana</p>
+              <p className="text-sm text-muted-foreground">Esta semana</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Requieren Atención
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-destructive to-destructive/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                Atención
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-destructive">
                 {teamMembers.filter((m: any) => (m.points || 0) < 300).length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">Agentes con bajo desempeño</p>
+              <p className="text-sm text-muted-foreground">Bajo desempeño</p>
             </CardContent>
           </Card>
-        </div>
+          </div>
 
         {/* Team Members List */}
         <Card>
@@ -272,6 +277,7 @@ export default function Team() {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </TrainingDashboardLayout>
   );

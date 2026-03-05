@@ -70,10 +70,10 @@ export default function ProgressPage() {
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "text-green-600 dark:text-green-400";
-    if (score >= 75) return "text-blue-600 dark:text-blue-400";
-    if (score >= 60) return "text-yellow-600 dark:text-yellow-400";
-    return "text-red-600 dark:text-red-400";
+    if (score >= 90) return "text-primary";
+    if (score >= 75) return "text-chart-4";
+    if (score >= 60) return "text-chart-2";
+    return "text-destructive";
   };
 
   // Calculate complexity distribution
@@ -87,17 +87,18 @@ export default function ProgressPage() {
 
   return (
     <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Mi Progreso</h1>
-          <p className="text-muted-foreground mt-1">
-            Análisis detallado de tu evolución y desempeño
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Mi Progreso</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Análisis detallado de tu evolución y desempeño
+            </p>
+          </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Key Metrics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
           <Card className="border-l-4 border-l-primary">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -289,10 +290,10 @@ export default function ProgressPage() {
               )}
 
               {completedSims.length >= 5 && stats && stats.averageScore >= 85 && (
-                <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
+                <div className="p-4 rounded-lg bg-chart-4/10 border border-chart-4/20">
                   <h4 className="font-semibold text-foreground mb-2">Desafío Sugerido</h4>
                   <p className="text-sm text-muted-foreground">
-                    Con tu nivel actual, estás listo para intentar escenarios de complejidad 4 o 5. 
+                    Con tu nivel actual, estás listo para intentar escenarios de complejidad 4 o 5.
                     Estos casos te ayudarán a perfeccionar tus habilidades avanzadas.
                   </p>
                 </div>
@@ -300,6 +301,7 @@ export default function ProgressPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </TrainingDashboardLayout>
   );

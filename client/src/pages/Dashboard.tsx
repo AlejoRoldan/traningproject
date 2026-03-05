@@ -66,82 +66,87 @@ export default function Dashboard() {
 
   return (
     <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            ¡Bienvenido, {user?.name?.split(" ")[0] || "Agente"}!
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Aquí está tu resumen de progreso y actividades recientes
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">
+              ¡Bienvenido, {user?.name?.split(" ")[0] || "Agente"}!
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Aquí está tu resumen de progreso y actividades recientes
+            </p>
+          </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-primary">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Simulaciones Completadas
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Target className="w-4 h-4 text-primary" />
+                Simulaciones
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">
                 {stats?.totalSimulations || 0}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground">
                 Total de entrenamientos realizados
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Promedio de Desempeño
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-2 to-chart-2/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-chart-2" />
+                Desempeño
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">
                 {stats?.averageScore || 0}%
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground">
                 Puntuación promedio general
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Trophy className="w-4 h-4" />
-                Badges Obtenidos
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-4 to-chart-4/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-chart-4" />
+                Logros
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">
                 {badges.length}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Logros desbloqueados
+              <p className="text-sm text-muted-foreground">
+                Badges desbloqueados
               </p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-chart-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Puntos Totales
+          <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border border-border/50">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-1 to-chart-1/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Zap className="w-4 h-4 text-chart-1" />
+                Puntos
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">
                 {user?.points || 0}
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground">
                 Puntos de experiencia acumulados
               </p>
             </CardContent>
@@ -150,38 +155,43 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Level Progress */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
+          <Card className="lg:col-span-2 hover:shadow-lg transition-all duration-300">
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2 text-2xl">
+                <Award className="w-6 h-6 text-primary" />
                 Progreso de Nivel
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-base">
                 Nivel actual: <span className="font-semibold capitalize text-foreground">{user?.level || "junior"}</span>
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progreso hacia {getNextLevelName()}</span>
-                  <span className="font-semibold text-foreground">{Math.round(getLevelProgress())}%</span>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">Progreso hacia {getNextLevelName()}</span>
+                  <span className="text-sm font-bold text-primary">{Math.round(getLevelProgress())}%</span>
                 </div>
-                <Progress value={getLevelProgress()} className="h-3" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <p className="text-xs text-muted-foreground">Puntos actuales</p>
-                  <p className="text-2xl font-bold text-primary">{user?.points || 0}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Próximo nivel</p>
-                  <p className="text-2xl font-bold text-foreground capitalize">{getNextLevelName()}</p>
+                <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+                    style={{ width: `${getLevelProgress()}%` }}
+                  />
                 </div>
               </div>
 
-              <Button className="w-full" asChild>
-                <Link href="/gamification" className="flex items-center justify-center gap-2">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Puntos</p>
+                  <p className="text-3xl font-bold text-primary">{user?.points || 0}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Próximo</p>
+                  <p className="text-3xl font-bold text-foreground capitalize">{getNextLevelName()}</p>
+                </div>
+              </div>
+
+              <Button className="w-full gap-2" asChild>
+                <Link href="/gamification">
                   Ver Gamificación Completa
                   <ArrowRight className="w-4 h-4" />
                 </Link>
@@ -190,24 +200,29 @@ export default function Dashboard() {
           </Card>
 
           {/* Active Improvement Plan */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Plan de Mejora Activo</CardTitle>
+          <Card className="hover:shadow-lg transition-all duration-300">
+            <CardHeader className="space-y-1">
+              <CardTitle className="text-xl">Plan de Mejora</CardTitle>
             </CardHeader>
             <CardContent>
               {activePlan ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-foreground">{activePlan.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{activePlan.description}</p>
+                <div className="space-y-5">
+                  <div className="space-y-1">
+                    <h3 className="font-semibold text-foreground text-lg">{activePlan.title}</h3>
+                    <p className="text-sm text-muted-foreground">{activePlan.description}</p>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progreso</span>
-                      <span className="font-semibold text-foreground">{activePlan.progress}%</span>
+                      <span className="font-medium text-foreground">Progreso</span>
+                      <span className="font-bold text-primary">{activePlan.progress}%</span>
                     </div>
-                    <Progress value={activePlan.progress} className="h-2" />
+                    <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+                        style={{ width: `${activePlan.progress}%` }}
+                      />
+                    </div>
                   </div>
 
                   <Button variant="outline" className="w-full" asChild>
@@ -218,9 +233,12 @@ export default function Dashboard() {
                 </div>
               ) : (
                 <div className="text-center py-8 space-y-3">
-                  <CheckCircle2 className="w-12 h-12 text-muted-foreground mx-auto" />
-                  <p className="text-sm text-muted-foreground">
-                    No tienes planes de mejora activos en este momento
+                  <CheckCircle2 className="w-16 h-16 text-accent mx-auto" />
+                  <p className="text-sm text-muted-foreground font-medium">
+                    No tienes planes activos
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Completa entrenamientos para desbloquear planes
                   </p>
                 </div>
               )}
@@ -229,41 +247,41 @@ export default function Dashboard() {
         </div>
 
         {/* Recent Simulations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" />
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="space-y-2">
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Clock className="w-6 h-6 text-primary" />
               Simulaciones Recientes
             </CardTitle>
-            <CardDescription>Tus últimas 5 sesiones de entrenamiento</CardDescription>
+            <CardDescription className="text-base">Tus últimas 5 sesiones de entrenamiento</CardDescription>
           </CardHeader>
           <CardContent>
             {recentSims.length > 0 ? (
               <div className="space-y-3">
                 {recentSims.map((sim) => (
-                  <div 
-                    key={sim.id} 
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
+                  <div
+                    key={sim.id}
+                    className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-accent/50 hover:border-border transition-all duration-200 group"
                   >
                     <div className="flex-1">
-                      <p className="font-medium text-foreground">Simulación #{sim.id}</p>
+                      <p className="font-semibold text-foreground">Simulación #{sim.id}</p>
                       <p className="text-sm text-muted-foreground">
-                        {new Date(sim.startedAt).toLocaleDateString("es-PY", { 
-                          day: "numeric", 
-                          month: "long", 
-                          year: "numeric" 
+                        {new Date(sim.startedAt).toLocaleDateString("es-PY", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric"
                         })}
                       </p>
                     </div>
-                    
+
                     {sim.overallScore !== null && (
                       <div className="text-right mr-4">
                         <p className="text-2xl font-bold text-primary">{sim.overallScore}%</p>
                         <p className="text-xs text-muted-foreground">Puntuación</p>
                       </div>
                     )}
-                    
-                    <Button variant="ghost" size="sm" asChild>
+
+                    <Button variant="ghost" size="sm" asChild className="group-hover:bg-accent">
                       <Link href={`/simulations/${sim.id}`}>
                         Ver Detalles
                       </Link>
@@ -272,16 +290,16 @@ export default function Dashboard() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <Target className="w-16 h-16 text-muted-foreground mx-auto" />
+              <div className="text-center py-16 space-y-6">
+                <Target className="w-20 h-20 text-muted-foreground mx-auto opacity-50" />
                 <div>
-                  <p className="text-lg font-semibold text-foreground">¡Comienza tu primer entrenamiento!</p>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-xl font-semibold text-foreground">¡Comienza tu primer entrenamiento!</p>
+                  <p className="text-muted-foreground mt-2">
                     Explora los escenarios disponibles y mejora tus habilidades
                   </p>
                 </div>
-                <Button asChild>
-                  <Link href="/scenarios" className="flex items-center gap-2">
+                <Button size="lg" asChild>
+                  <Link href="/scenarios" className="gap-2">
                     Ver Escenarios
                     <ArrowRight className="w-4 h-4" />
                   </Link>
@@ -292,31 +310,38 @@ export default function Dashboard() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button size="lg" className="h-auto py-6" asChild>
-            <Link href="/scenarios" className="flex flex-col items-center gap-2">
-              <BookOpen className="w-6 h-6" />
-              <span className="font-semibold">Explorar Escenarios</span>
-              <span className="text-xs opacity-90">Encuentra tu próximo desafío</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <Button size="lg" className="h-auto py-6 md:py-8 flex-col rounded-xl hover:shadow-lg transition-all duration-300" asChild>
+            <Link href="/scenarios" className="gap-3">
+              <BookOpen className="w-7 h-7" />
+              <div className="flex flex-col items-center gap-1">
+                <span className="font-bold text-base">Explorar Escenarios</span>
+                <span className="text-xs opacity-80">Encuentra tu próximo desafío</span>
+              </div>
             </Link>
           </Button>
 
-          <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/simulations" className="flex flex-col items-center gap-2">
-              <Target className="w-6 h-6" />
-              <span className="font-semibold">Mis Simulaciones</span>
-              <span className="text-xs opacity-90">Revisa tu historial</span>
+          <Button size="lg" variant="outline" className="h-auto py-6 md:py-8 flex-col rounded-xl hover:shadow-lg transition-all duration-300" asChild>
+            <Link href="/simulations" className="gap-3">
+              <Target className="w-7 h-7" />
+              <div className="flex flex-col items-center gap-1">
+                <span className="font-bold text-base">Mis Simulaciones</span>
+                <span className="text-xs opacity-80">Revisa tu historial</span>
+              </div>
             </Link>
           </Button>
 
-          <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/progress" className="flex flex-col items-center gap-2">
-              <TrendingUp className="w-6 h-6" />
-              <span className="font-semibold">Ver Progreso</span>
-              <span className="text-xs opacity-90">Analiza tu evolución</span>
+          <Button size="lg" variant="outline" className="h-auto py-6 md:py-8 flex-col rounded-xl hover:shadow-lg transition-all duration-300" asChild>
+            <Link href="/progress" className="gap-3">
+              <TrendingUp className="w-7 h-7" />
+              <div className="flex flex-col items-center gap-1">
+                <span className="font-bold text-base">Ver Progreso</span>
+                <span className="text-xs opacity-80">Analiza tu evolución</span>
+              </div>
             </Link>
           </Button>
         </div>
+      </div>
       </div>
     </TrainingDashboardLayout>
   );

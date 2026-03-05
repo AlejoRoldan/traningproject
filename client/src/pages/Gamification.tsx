@@ -21,43 +21,43 @@ const badgeDefinitions: Record<string, { name: string; description: string; icon
     name: "Maestro de Empatía",
     description: "Logra 90% o más en empatía",
     icon: Award,
-    color: "text-pink-600 dark:text-pink-400"
+    color: "text-primary"
   },
   protocol_master: {
     name: "Guardián del Protocolo",
     description: "Logra 95% o más en protocolo",
     icon: Shield,
-    color: "text-blue-600 dark:text-blue-400"
+    color: "text-chart-4"
   },
   problem_solver: {
     name: "Solucionador Experto",
     description: "Logra 90% o más en resolución",
     icon: Target,
-    color: "text-green-600 dark:text-green-400"
+    color: "text-primary"
   },
   crisis_handler: {
     name: "Manejador de Crisis",
     description: "Completa escenario nivel 4+ con 85%+",
     icon: Flame,
-    color: "text-orange-600 dark:text-orange-400"
+    color: "text-destructive"
   },
   excellence_award: {
     name: "Premio a la Excelencia",
     description: "Logra 95% o más en cualquier simulación",
     icon: Crown,
-    color: "text-yellow-600 dark:text-yellow-400"
+    color: "text-primary"
   },
   first_steps: {
     name: "Primeros Pasos",
     description: "Completa tu primera simulación",
     icon: Star,
-    color: "text-gray-600 dark:text-gray-400"
+    color: "text-chart-2"
   },
   dedicated_learner: {
     name: "Aprendiz Dedicado",
     description: "Completa 10 simulaciones",
     icon: Zap,
-    color: "text-purple-600 dark:text-purple-400"
+    color: "text-primary"
   },
   master_trainer: {
     name: "Maestro del Entrenamiento",
@@ -68,9 +68,9 @@ const badgeDefinitions: Record<string, { name: string; description: string; icon
 };
 
 const levelThresholds = {
-  junior: { min: 0, max: 499, next: "intermediate", color: "text-gray-600 dark:text-gray-400" },
-  intermediate: { min: 500, max: 1499, next: "senior", color: "text-blue-600 dark:text-blue-400" },
-  senior: { min: 1500, max: 2999, next: "expert", color: "text-purple-600 dark:text-purple-400" },
+  junior: { min: 0, max: 499, next: "intermediate", color: "text-muted-foreground" },
+  intermediate: { min: 500, max: 1499, next: "senior", color: "text-chart-4" },
+  senior: { min: 1500, max: 2999, next: "expert", color: "text-chart-2" },
   expert: { min: 3000, max: Infinity, next: null, color: "text-primary" }
 };
 
@@ -94,17 +94,18 @@ export default function Gamification() {
 
   return (
     <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Gamificación</h1>
-          <p className="text-muted-foreground mt-1">
-            Desbloquea logros y avanza de nivel mientras mejoras tus habilidades
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Gamificación</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Desbloquea logros y avanza de nivel mientras mejoras tus habilidades
+            </p>
+          </div>
 
-        {/* Level Progress Card */}
-        <Card className="border-2 border-primary/50 bg-gradient-to-br from-primary/5 to-transparent">
+          {/* Level Progress Card */}
+          <Card className="border border-primary/30 bg-gradient-to-br from-primary/5 to-transparent hover:shadow-lg transition-all duration-300">
           <CardContent className="pt-6">
             <div className="flex items-center gap-6">
               {/* Level Badge */}
@@ -250,15 +251,15 @@ export default function Gamification() {
                 return (
                   <div
                     key={badgeId}
-                    className={`p-6 rounded-lg border-2 transition-all ${
+                    className={`p-6 rounded-xl border transition-all duration-300 ${
                       isEarned
-                        ? "border-primary/50 bg-primary/5 hover:shadow-lg"
-                        : "border-border bg-muted/30 opacity-60"
+                        ? "border-primary/30 bg-primary/5 hover:shadow-lg hover:border-primary/50"
+                        : "border-border/50 bg-muted/30 opacity-60"
                     }`}
                   >
                     <div className="flex flex-col items-center text-center space-y-3">
-                      <div className={`w-16 h-16 rounded-full flex items-center justify-center ${
-                        isEarned ? "bg-primary/20" : "bg-muted"
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+                        isEarned ? "bg-primary/20 shadow-sm" : "bg-muted"
                       }`}>
                         {isEarned ? (
                           <BadgeIcon className={`w-8 h-8 ${badge.color}`} />
@@ -266,18 +267,18 @@ export default function Gamification() {
                           <Lock className="w-8 h-8 text-muted-foreground" />
                         )}
                       </div>
-                      
+
                       <div>
-                        <h4 className={`font-bold ${isEarned ? "text-foreground" : "text-muted-foreground"}`}>
+                        <h4 className={`font-bold text-sm ${isEarned ? "text-foreground" : "text-muted-foreground"}`}>
                           {badge.name}
                         </h4>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-2">
                           {badge.description}
                         </p>
                       </div>
 
                       {isEarned && (
-                        <Badge variant="outline" className="text-xs">
+                        <Badge variant="outline" className="text-xs mt-2">
                           <Award className="w-3 h-3 mr-1" />
                           Desbloqueado
                         </Badge>
@@ -291,19 +292,19 @@ export default function Gamification() {
         </Card>
 
         {/* Achievements Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-primary" />
+        <Card className="hover:shadow-lg transition-all duration-300">
+          <CardHeader className="space-y-1">
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Star className="w-6 h-6 text-primary" />
               Resumen de Logros
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-6 rounded-lg bg-accent/50">
+              <div className="text-center p-6 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20">
                 <Trophy className="w-12 h-12 text-primary mx-auto mb-3" />
                 <p className="text-3xl font-bold text-foreground">{earnedBadges.length}</p>
-                <p className="text-sm text-muted-foreground mt-1">Badges Ganados</p>
+                <p className="text-sm text-muted-foreground mt-2">Badges Ganados</p>
               </div>
               
               <div className="text-center p-6 rounded-lg bg-accent/50">
@@ -320,6 +321,7 @@ export default function Gamification() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
     </TrainingDashboardLayout>
   );

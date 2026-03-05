@@ -45,11 +45,11 @@ const categoryLabels: Record<string, string> = {
 };
 
 const complexityColors: Record<number, string> = {
-  1: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
-  2: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
+  1: "bg-primary/10 text-primary border-primary/20",
+  2: "bg-chart-2/10 text-chart-2 border-chart-2/20",
   3: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20",
   4: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20",
-  5: "bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20",
+  5: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 const complexityLabels: Record<number, string> = {
@@ -81,17 +81,18 @@ export default function Scenarios() {
 
   return (
     <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Biblioteca de Escenarios</h1>
-          <p className="text-muted-foreground mt-1">
-            Explora y practica con diferentes situaciones bancarias
-          </p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
+          {/* Header */}
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Biblioteca de Escenarios</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Explora y practica con diferentes situaciones bancarias
+            </p>
+          </div>
 
-        {/* Filters */}
-        <Card>
+          {/* Filters */}
+          <Card className="hover:shadow-lg transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Filter className="w-5 h-5" />
@@ -101,11 +102,11 @@ export default function Scenarios() {
           <CardContent>
             <div className="space-y-4">
               {/* Practice Mode Toggle */}
-              <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border-2 border-primary/20">
+              <div className="flex items-center justify-between p-4 bg-primary/5 rounded-lg border border-primary/20 hover:bg-primary/10 transition-colors duration-200">
                 <div className="flex items-center gap-3">
                   <GraduationCap className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="font-medium text-foreground">Modo Práctica</p>
+                    <p className="font-semibold text-foreground">Modo Práctica</p>
                     <p className="text-xs text-muted-foreground">Sin evaluación ni puntuación</p>
                   </div>
                 </div>
@@ -116,7 +117,7 @@ export default function Scenarios() {
                     onChange={(e) => setIsPracticeMode(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                  <div className="w-11 h-6 bg-secondary peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer dark:bg-secondary peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-secondary after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-secondary peer-checked:bg-primary"></div>
                 </label>
               </div>
 
@@ -198,37 +199,37 @@ export default function Scenarios() {
               const CategoryIcon = categoryIcons[scenario.category] || Phone;
               
               return (
-                <Card key={scenario.id} className="hover:shadow-lg transition-shadow border-2 hover:border-primary/50">
+                <Card key={scenario.id} className="hover:shadow-lg transition-all duration-300 border border-border/50 overflow-hidden group">
                   <CardHeader>
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <div className="p-2 rounded-lg bg-primary/10">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <div className="p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors">
                         <CategoryIcon className="w-5 h-5 text-primary" />
                       </div>
-                      <Badge 
-                        variant="outline" 
-                        className={complexityColors[scenario.complexity]}
+                      <Badge
+                        variant="outline"
+                        className={`${complexityColors[scenario.complexity]} font-semibold`}
                       >
                         Nivel {scenario.complexity}
                       </Badge>
                     </div>
-                    <CardTitle className="text-lg line-clamp-2">{scenario.title}</CardTitle>
+                    <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">{scenario.title}</CardTitle>
                     <CardDescription className="line-clamp-3">
                       {scenario.description}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-5">
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{scenario.estimatedDuration} min</span>
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-4 h-4 text-primary/70" />
+                        <span className="font-medium">{scenario.estimatedDuration} min</span>
                       </div>
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-4 h-4" />
-                        <span className="capitalize">{categoryLabels[scenario.category]}</span>
+                      <div className="flex items-center gap-1.5">
+                        <TrendingUp className="w-4 h-4 text-primary/70" />
+                        <span className="capitalize font-medium">{categoryLabels[scenario.category]}</span>
                       </div>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-2">
                       <Link href={`/simulation/start/${scenario.id}${isPracticeMode ? '?practice=true' : ''}`}>
                         <Button className="flex-1 flex items-center justify-center gap-2">
                           <Play className="w-4 h-4" />
@@ -259,6 +260,7 @@ export default function Scenarios() {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </TrainingDashboardLayout>
   );

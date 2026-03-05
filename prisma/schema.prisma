@@ -1,0 +1,546 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  shadowDatabaseUrl = env("DB_SHADOW_DATABASE_URL")
+}
+
+// ============================================================================
+// AUTH & USER MANAGEMENT
+// ============================================================================
+
+model User {
+  id                String      @id @default(cuid())
+  email             String      @unique
+  name              String
+  avatar            String?
+  passwordHash      String
+  role              UserRole    @default(AGENT)
+  status            UserStatus  @default(ACTIVE)
+
+  // Profile
+  department        String?
+  supervisorId      String?
+  supervisor        User?       @relation("SupervisorToAgents", fields: [supervisorId], references: [id], onDelete: SetNull)
+  agents            User[]      @relation("SupervisorToAgents")
+
+  // Gamification
+  experiencePoints  Int         @default(0)
+  level             Int         @default(1)
+  currentLevelXP    Int         @default(0)
+
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  lastLoginAt       DateTime?
+
+  // Relations
+  sessions          TrainingSession[]
+  markers           SessionMarker[]
+  achievements      UserAchievement[]
+  feedbackGiven     SessionFeedback[]
+
+  @@index([role])
+  @@index([supervisorId])
+  @@index([createdAt])
+  @@fulltext([name, email])
+}
+
+enum UserRole {
+  AGENT
+  SUPERVISOR
+  ADMIN
+  SYSTEM
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DELETED
+}
+
+// ============================================================================
+// TRAINING SCENARIOS
+// ============================================================================
+
+model Scenario {
+  id                String      @id @default(cuid())
+  title             String
+  description       String      @db.Text
+  category          ScenarioCategory
+  difficulty        DifficultyLevel @default(INTERMEDIATE)
+
+  // Client Profile
+  clientPersonality String      // "angry", "confused", "friendly", "demanding"
+  clientName        String
+  clientContext     String      @db.Text // Brief context about the client
+  clientLanguage    ClientLanguage @default(ES_PY) // Paraguay Spanish support
+
+  // Scenario Details
+  initialPrompt     String      @db.Text // How the client initiates the conversation
+  expectedFlow      String?     @db.Text // Expected conversation flow
+  keywordTargets    String[]    @default([]) // Keywords agent should use
+  scriptUsageRequired Boolean    @default(false)
+  maxDurationSeconds Int        @default(600)
+
+  // Metadata
+  isActive          Boolean     @default(true)
+  estimatedXP       Int         @default(10)
+  tags              String[]    @default([])
+
+  // Timestamps
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  sessions          TrainingSession[]
+
+  @@index([category])
+  @@index([difficulty])
+  @@index([isActive])
+  @@fulltext([title, description])
+}
+
+enum ScenarioCategory {
+  // Billing & Accounts
+  BILLING_DISPUTE
+  ACCOUNT_INFO
+  ACCOUNT_CLOSURE
+
+  // Technical Support
+  TECHNICAL_ISSUE
+  SYSTEM_PROBLEM
+  APP_NAVIGATION
+
+  // Products & Services
+  PRODUCT_INQUIRY
+  SERVICE_UPGRADE
+  PLAN_CHANGE
+
+  // Fraud & Security
+  FRAUD_REPORT
+  UNAUTHORIZED_TRANSACTION
+  ACCOUNT_SECURITY
+
+  // Collections
+  OVERDUE_PAYMENT
+  DEBT_NEGOTIATION
+  PAYMENT_PLAN
+}
+
+enum DifficultyLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ClientLanguage {
+  ES_PY    // Paraguay Spanish (Guaraní mix)
+  ES_ES    // Spain Spanish
+  PT_BR    // Brazilian Portuguese
+  EN_US    // English
+}
+
+// ============================================================================
+// TRAINING SESSIONS
+// ============================================================================
+
+model TrainingSession {
+  id                    String      @id @default(cuid())
+  agentId               String
+  agent                 User        @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  scenarioId            String
+  scenario              Scenario    @relation(fields: [scenarioId], references: [id], onDelete: Restrict)
+
+  // Session Metadata
+  status                SessionStatus @default(IN_PROGRESS)
+  startedAt             DateTime    @default(now())
+  completedAt           DateTime?
+  durationSeconds       Int?        // Calculated when completed
+
+  // Audio & Transcription
+  audioUrl              String?     // S3 URL to recorded audio
+  audioSize            Int?        // File size in bytes
+  audioMimeType        String?     // audio/webm, audio/wav, etc
+  transcription         String?     @db.Text // Complete transcription
+  clientTranscription   String?     @db.Text // What the AI client said
+
+  // Evaluation Data
+  evaluation            SessionEvaluation?
+  feedback              SessionFeedback[]
+
+  // Markers from Supervisors
+  markers               SessionMarker[]
+
+  // Raw Data
+  rawData               Json?       // Store additional context if needed
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([agentId])
+  @@index([scenarioId])
+  @@index([status])
+  @@index([completedAt])
+  @@index([createdAt])
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model SessionEvaluation {
+  id                    String      @id @default(cuid())
+  sessionId             String      @unique
+  session               TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  // Core Evaluation Scores (1-10)
+  empathyScore          Int         // How well did agent show empathy?
+  clarityScore          Int         // How clear and professional?
+  protocolScore         Int         // Did they follow company protocol?
+  resolutionScore       Int         // Did they solve the problem?
+  confidenceScore       Int         // Did they inspire confidence?
+
+  // Composite Score
+  overallScore          Float       // Weighted average of above
+
+  // Voice Analysis
+  voiceAnalysis         VoiceAnalysis?
+
+  // Text Feedback
+  strengths             String[]    @default([])
+  weaknesses            String[]    @default([])
+  recommendations       String[]    @default([])
+  detailedFeedback      String?     @db.Text
+
+  // Keywords
+  keywordsUsed          String[]    @default([])
+  missedKeywords        String[]    @default([])
+
+  // Timestamps
+  evaluatedAt           DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([sessionId])
+}
+
+model VoiceAnalysis {
+  id                    String      @id @default(cuid())
+  evaluationId          String      @unique
+  evaluation            SessionEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+
+  // Vocal Metrics
+  speechRate            Float?      // Words per minute
+  pauseCount            Int?        // Number of pauses
+  averagePauseDuration  Float?      // Seconds
+  clarityScore          Float?      // 0-100
+  confidenceLevel       String?     // "low", "medium", "high"
+
+  // Emotional Analysis
+  empathyDetection      Float?      // 0-100
+  professionalismScore  Float?      // 0-100
+  enthusiasmLevel       String?     // "low", "medium", "high"
+
+  // Overall Analysis
+  voiceTone             String?     // Description of vocal tone
+  recommendations       String?     @db.Text
+
+  // Timestamps
+  analyzedAt            DateTime    @default(now())
+
+  @@index([evaluationId])
+}
+
+// ============================================================================
+// FEEDBACK & SUPERVISION
+// ============================================================================
+
+model SessionMarker {
+  id                    String      @id @default(cuid())
+  sessionId             String
+  session               TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  createdBy             String
+  supervisor            User        @relation(fields: [createdBy], references: [id], onDelete: Restrict)
+
+  // Marker Details
+  timestamp             Int         // Seconds in the recording
+  category              MarkerCategory
+  notes                 String?     @db.Text
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+
+  @@index([sessionId])
+  @@index([createdBy])
+}
+
+enum MarkerCategory {
+  EXCELLENT
+  GOOD
+  NEEDS_IMPROVEMENT
+  CRITICAL_ERROR
+  POSITIVE_BEHAVIOR
+  PROTOCOL_VIOLATION
+}
+
+model SessionFeedback {
+  id                    String      @id @default(cuid())
+  sessionId             String
+  session               TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  providedBy            String
+  provider              User        @relation(fields: [providedBy], references: [id], onDelete: Restrict)
+
+  // Feedback Content
+  category              FeedbackCategory
+  content               String      @db.Text
+  isPositive            Boolean
+
+  // Metadata
+  visibility            FeedbackVisibility @default(PRIVATE)
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([sessionId])
+  @@index([providedBy])
+}
+
+enum FeedbackCategory {
+  COMMUNICATION
+  TECHNICAL_KNOWLEDGE
+  CUSTOMER_EMPATHY
+  PROBLEM_RESOLUTION
+  COMPLIANCE
+  OTHER
+}
+
+enum FeedbackVisibility {
+  PRIVATE      // Only supervisor and agent
+  TEAM         // All team members
+  PUBLIC       // All users
+}
+
+// ============================================================================
+// GAMIFICATION & ACHIEVEMENTS
+// ============================================================================
+
+model Achievement {
+  id                    String      @id @default(cuid())
+  name                  String
+  description           String      @db.Text
+  badge                 String?     // URL to badge image
+
+  // Requirements
+  requiredXP            Int         @default(0)
+  requiredScore         Float       @default(0)
+  requiredSessions      Int         @default(0)
+  condition             String?     @db.Text // JSON condition
+
+  // Metadata
+  rarity                AchievementRarity @default(COMMON)
+  category              String
+  isActive              Boolean     @default(true)
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  // Relations
+  userAchievements      UserAchievement[]
+
+  @@index([isActive])
+}
+
+enum AchievementRarity {
+  COMMON
+  UNCOMMON
+  RARE
+  EPIC
+  LEGENDARY
+}
+
+model UserAchievement {
+  id                    String      @id @default(cuid())
+  userId                String
+  user                  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievementId         String
+  achievement           Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  // Metadata
+  unlockedAt            DateTime    @default(now())
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+// ============================================================================
+// COMPANY & ORGANIZATION
+// ============================================================================
+
+model Company {
+  id                    String      @id @default(cuid())
+  name                  String
+  legalName             String?
+  industry              String?
+  country               String      @default("PY")
+
+  // Contact
+  email                 String?
+  phone                 String?
+  website               String?
+
+  // Branding
+  logoUrl               String?
+  primaryColor          String?     @default("#00D084")
+
+  // Billing
+  plan                  String      @default("BASIC")
+  maxAgents             Int         @default(50)
+  maxSessions           Int         @default(1000)
+
+  // Settings
+  settings              Json?
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([country])
+}
+
+// ============================================================================
+// AUDIT & LOGGING
+// ============================================================================
+
+model AuditLog {
+  id                    String      @id @default(cuid())
+  userId                String?
+  action                String
+  resource              String
+  resourceId            String?
+  changes               Json?
+  ipAddress             String?
+  userAgent             String?
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([resourceId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// NOTIFICATIONS & ALERTS
+// ============================================================================
+
+model Notification {
+  id                    String      @id @default(cuid())
+  userId                String
+  type                  NotificationType
+  title                 String
+  message               String      @db.Text
+  relatedEntityId       String?
+  relatedEntityType     String?
+
+  // Status
+  isRead                Boolean     @default(false)
+  readAt                DateTime?
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  expiresAt             DateTime?
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  SESSION_EVALUATION
+  ACHIEVEMENT_UNLOCKED
+  FEEDBACK_RECEIVED
+  PROMOTION
+  ALERT
+  INFO
+}
+
+// ============================================================================
+// SYSTEM & CONFIGURATION
+// ============================================================================
+
+model SystemConfig {
+  id                    String      @id @default(cuid())
+  key                   String      @unique
+  value                 Json
+  description           String?
+
+  // Metadata
+  isSecret              Boolean     @default(false)
+  isEditable            Boolean     @default(true)
+
+  // Timestamps
+  updatedAt             DateTime    @updatedAt
+
+  @@index([key])
+}
+
+model FeatureFlag {
+  id                    String      @id @default(cuid())
+  name                  String      @unique
+  enabled               Boolean     @default(false)
+  percentage            Int         @default(100) // 0-100 for gradual rollout
+
+  // Targeting
+  targetUsers           String[]    @default([])
+  targetRoles           UserRole[]  @default([])
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([enabled])
+}
+
+// ============================================================================
+// TRAINING RESPONSE TEMPLATES
+// ============================================================================
+
+model ResponseTemplate {
+  id                    String      @id @default(cuid())
+  name                  String
+  description           String?
+  category              String      // e.g., "greeting", "closing", "objection_handling"
+  content               String      @db.Text
+  keywords              String[]    @default([])
+
+  // Usage
+  isPrimaryFor          String[]    @default([]) // Scenario IDs
+  isOptional            Boolean     @default(false)
+
+  // Metadata
+  isActive              Boolean     @default(true)
+
+  // Timestamps
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
