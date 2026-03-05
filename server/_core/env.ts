@@ -13,8 +13,8 @@ const envSchema = z.object({
 
   // Authentication & OAuth
   JWT_SECRET: z.string().min(1, 'JWT_SECRET is required').optional().or(z.undefined()),
-  VITE_APP_ID: z.string().min(1, 'VITE_APP_ID is required'),
-  OAUTH_SERVER_URL: z.string().url('OAUTH_SERVER_URL must be a valid URL'),
+  VITE_APP_ID: z.string().min(1, 'VITE_APP_ID is required').optional(),
+  OAUTH_SERVER_URL: z.string().url('OAUTH_SERVER_URL must be a valid URL').optional(),
   OWNER_OPEN_ID: z.string().default('default-owner-open-id'),
   OWNER_NAME: z.string().default('Default Owner'),
 
@@ -30,9 +30,9 @@ const envSchema = z.object({
   // AI Provider selection: 'anthropic' | 'gemini' (default: 'anthropic' if key is set)
   AI_PROVIDER: z.enum(['anthropic', 'gemini']).optional(),
 
-  // Manus Built-in APIs
-  BUILT_IN_FORGE_API_URL: z.string().url('BUILT_IN_FORGE_API_URL must be a valid URL'),
-  BUILT_IN_FORGE_API_KEY: z.string().min(1, 'BUILT_IN_FORGE_API_KEY is required'),
+  // Manus Built-in APIs (optional for standalone deployments)
+  BUILT_IN_FORGE_API_URL: z.string().url('BUILT_IN_FORGE_API_URL must be a valid URL').optional(),
+  BUILT_IN_FORGE_API_KEY: z.string().min(1, 'BUILT_IN_FORGE_API_KEY is required').optional(),
 
   // Aliases for backward compatibility
   forgeApiUrl: z.string().url('forgeApiUrl must be a valid URL').optional(),
