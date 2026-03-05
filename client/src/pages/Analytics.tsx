@@ -26,17 +26,18 @@ export default function Analytics() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <div className="flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Analíticas</h1>
-          <p className="text-muted-foreground">
-            Métricas y estadísticas de rendimiento de la plataforma
-          </p>
-        </div>
-        
-        <div className="w-48">
-          <label className="text-sm font-medium mb-2 block">Filtrar por Agente</label>
+    <div className="min-h-screen bg-background">
+      <div className="p-8 md:p-10 lg:p-12 space-y-10">
+        <div className="flex justify-between items-start">
+          <div className="space-y-3">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Analíticas</h1>
+            <p className="text-lg text-muted-foreground max-w-2xl">
+              Métricas y estadísticas de rendimiento de la plataforma
+            </p>
+          </div>
+
+          <div className="w-64">
+            <label className="text-sm font-semibold mb-2 block text-foreground">Filtrar por Agente</label>
           <Select value={selectedAgentId?.toString() || "all"} onValueChange={(value) => setSelectedAgentId(value === "all" ? undefined : parseInt(value))}>
             <SelectTrigger>
               <SelectValue placeholder="Todos los agentes" />
@@ -53,62 +54,62 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Overall Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Simulaciones</CardTitle>
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalSimulations || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats?.completedSimulations || 0} completadas
-            </p>
-          </CardContent>
-        </Card>
+        {/* Overall Stats Cards */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <Card className="hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Simulaciones</CardTitle>
+              <BarChart3 className="h-5 w-5 text-primary" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="text-3xl font-bold text-foreground">{stats?.totalSimulations || 0}</div>
+              <p className="text-sm text-muted-foreground">
+                {stats?.completedSimulations || 0} completadas
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Promedio General</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.averageScore || 0}%</div>
-            <p className="text-xs text-muted-foreground">
-              Puntuación promedio de todos los agentes
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Promedio</CardTitle>
+              <TrendingUp className="h-5 w-5 text-chart-2" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="text-3xl font-bold text-foreground">{stats?.averageScore || 0}%</div>
+              <p className="text-sm text-muted-foreground">
+                Puntuación general
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Agentes Activos</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.activeUsers || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Usuarios con simulaciones completadas
-            </p>
-          </CardContent>
-        </Card>
+          <Card className="hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Agentes</CardTitle>
+              <Users className="h-5 w-5 text-chart-4" />
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="text-3xl font-bold text-foreground">{stats?.activeUsers || 0}</div>
+              <p className="text-sm text-muted-foreground">
+                Usuarios activos
+              </p>
+            </CardContent>
+          </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tiempo Promedio</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+          <Card className="hover:shadow-lg transition-all duration-300">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">Tiempo</CardTitle>
+              <Clock className="h-5 w-5 text-chart-1" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.averageDuration || 0}m</div>
-            <p className="text-xs text-muted-foreground">
+          <CardContent className="space-y-2">
+            <div className="text-3xl font-bold text-foreground">{stats?.averageDuration || 0}m</div>
+            <p className="text-sm text-muted-foreground">
               Duración promedio por simulación
             </p>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
 
-      <Tabs defaultValue="performance" className="space-y-4">
+        <Tabs defaultValue="performance" className="space-y-4">
         <TabsList>
           <TabsTrigger value="performance">Rendimiento por Categoría</TabsTrigger>
           <TabsTrigger value="leaderboard">Tabla de Líderes</TabsTrigger>
@@ -134,14 +135,14 @@ export default function Analytics() {
                           {cat.averageScore}% ({cat.totalAttempts} intentos)
                         </span>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
+                      <div className="h-2.5 bg-secondary rounded-full overflow-hidden">
                         <div
                           className={`h-full transition-all ${
                             cat.averageScore >= 80
-                              ? 'bg-green-500'
+                              ? 'bg-primary'
                               : cat.averageScore >= 60
-                              ? 'bg-yellow-500'
-                              : 'bg-red-500'
+                              ? 'bg-chart-2'
+                              : 'bg-destructive'
                           }`}
                           style={{ width: `${cat.averageScore}%` }}
                         />
@@ -276,7 +277,8 @@ export default function Analytics() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
-    </div>
+        </Tabs>
+        </div>
+      </div>
   );
 }
