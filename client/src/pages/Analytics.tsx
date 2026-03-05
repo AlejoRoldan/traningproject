@@ -284,7 +284,6 @@ export default function Analytics() {
         </Tabs>
         </div>
       </div>
-      </div>
     </TrainingDashboardLayout>
   );
 }
