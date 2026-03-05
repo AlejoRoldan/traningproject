@@ -1,5 +1,4 @@
 import { ENV } from "./env";
-import { callGeminiChat, convertGeminiToOpenAI } from "./gemini";
 
 export type Role = "system" | "user" | "assistant" | "tool" | "function";
 
@@ -210,6 +209,17 @@ const normalizeToolChoice = (
   return toolChoice;
 };
 
+const resolveApiUrl = () =>
+  ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://forge.manus.im/v1/chat/completions";
+
+const assertApiKey = () => {
+  if (!ENV.forgeApiKey) {
+    throw new Error("OPENAI_API_KEY is not configured");
+  }
+};
+
 const normalizeResponseFormat = ({
   responseFormat,
   response_format,
@@ -255,99 +265,68 @@ const normalizeResponseFormat = ({
   };
 };
 
-const assertApiKey = () => {
-  if (!ENV.GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not configured");
-  }
-};
-
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   assertApiKey();
 
   const {
     messages,
-    maxTokens,
-    max_tokens,
+    tools,
+    toolChoice,
+    tool_choice,
+    outputSchema,
+    output_schema,
+    responseFormat,
+    response_format,
   } = params;
 
-  // Normalizar mensajes
-  const normalizedMessages = messages.map(normalizeMessage);
-  
-  // Separar mensajes de sistema
-  const systemMessages = normalizedMessages.filter((m) => m.role === "system");
-  const contentMessages = normalizedMessages.filter((m) => m.role !== "system");
-
-  // Convertir a formato Gemini
-  const geminiMessages = contentMessages.map((msg) => ({
-    role: msg.role === "assistant" ? "model" : "user",
-    parts: [
-      {
-        text:
-          typeof msg.content === "string"
-            ? msg.content
-            : JSON.stringify(msg.content),
-      },
-    ],
-  }));
-
-  // System instruction
-  const systemInstruction = systemMessages.length > 0 ? {
-    parts: [
-      {
-        text: systemMessages
-          .map((m) =>
-            typeof m.content === "string"
-              ? m.content
-              : JSON.stringify(m.content)
-          )
-          .join("\n"),
-      },
-    ],
-  } : undefined;
-
-  // Construir request de Gemini
-  const geminiRequest = {
-    contents: geminiMessages,
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: maxTokens || max_tokens || 8192,
-    },
-    ...(systemInstruction && { systemInstruction }),
+  const payload: Record<string, unknown> = {
+    model: "gemini-2.5-flash",
+    messages: messages.map(normalizeMessage),
   };
 
-  // Llamar a Gemini API
-  const geminiResponse = await callGeminiChat(
-    geminiRequest as any,
-    "gemini-2.0-flash"
+  if (tools && tools.length > 0) {
+    payload.tools = tools;
+  }
+
+  const normalizedToolChoice = normalizeToolChoice(
+    toolChoice || tool_choice,
+    tools
   );
+  if (normalizedToolChoice) {
+    payload.tool_choice = normalizedToolChoice;
+  }
 
-  // Convertir respuesta a formato compatible con OpenAI
-  const openaiResponse = convertGeminiToOpenAI(geminiResponse);
+  payload.max_tokens = 32768
+  payload.thinking = {
+    "budget_tokens": 128
+  }
 
-  // Construir respuesta en formato InvokeResult
-  return {
-    id: `gemini-${Date.now()}`,
-    created: Math.floor(Date.now() / 1000),
-    model: "gemini-2.0-flash",
-    choices: [
-      {
-        index: 0,
-        message: {
-          role: "assistant",
-          content: openaiResponse.content,
-        },
-        finish_reason: geminiResponse.candidates[0]?.finishReason || "stop",
-      },
-    ],
-    usage: geminiResponse.usageMetadata
-      ? {
-          prompt_tokens: geminiResponse.usageMetadata.promptTokenCount,
-          completion_tokens:
-            geminiResponse.usageMetadata.candidatesTokenCount,
-          total_tokens: geminiResponse.usageMetadata.totalTokenCount,
-        }
-      : undefined,
-  };
+  const normalizedResponseFormat = normalizeResponseFormat({
+    responseFormat,
+    response_format,
+    outputSchema,
+    output_schema,
+  });
+
+  if (normalizedResponseFormat) {
+    payload.response_format = normalizedResponseFormat;
+  }
+
+  const response = await fetch(resolveApiUrl(), {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${ENV.forgeApiKey}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `LLM invoke failed: ${response.status} ${response.statusText} – ${errorText}`
+    );
+  }
+
+  return (await response.json()) as InvokeResult;
 }

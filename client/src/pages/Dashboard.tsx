@@ -1,323 +1,268 @@
 import { useAuth } from "@/_core/hooks/useAuth";
-import TrainingDashboardLayout from "@/components/TrainingDashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { trpc } from "@/lib/trpc";
-import { 
-  Target, 
-  TrendingUp, 
-  Award, 
-  Clock, 
-  ArrowRight,
-  Trophy,
-  Zap,
-  CheckCircle2,
-  BookOpen
-} from "lucide-react";
 import { Link } from "wouter";
+import {
+  Target, Flame, Star, Trophy, ArrowRight, Play,
+  TrendingUp, BookOpen, Clock, CheckCircle2, Loader2
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  MetricCard, DifficultyBadge, CategoryBadge, WeeklyProgress, ScoreCircle, LevelBadge
+} from "@/components/KaitelComponents";
+import { cn } from "@/lib/utils";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const userStatsQuery = trpc.user.stats.useQuery();
-  const recentSimulationsQuery = trpc.simulations.mySimulations.useQuery({ limit: 5 });
-  const activePlanQuery = trpc.improvementPlans.activePlan.useQuery();
-  const userBadgesQuery = trpc.user.badges.useQuery();
-  const supabaseStatsQuery = trpc.supabase.getUserStats.useQuery();
-  const supabaseSimulationsQuery = trpc.supabase.getUserSimulations.useQuery();
+  const { data: stats, isLoading } = trpc.dashboard.stats.useQuery();
+  const { data: profile } = trpc.gamification.profile.useQuery();
 
-  const stats = userStatsQuery.data;
-  const recentSims = recentSimulationsQuery.data || [];
-  const activePlan = activePlanQuery.data;
-  const badges = userBadgesQuery.data || [];
-  const supabaseStats = supabaseStatsQuery.data;
-  const supabaseSimulations = supabaseSimulationsQuery.data || [];
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
-  // Calculate level progress (mock calculation)
-  const getLevelProgress = () => {
-    const points = user?.points || 0;
-    const currentLevelThreshold = {
-      junior: 0,
-      intermediate: 500,
-      senior: 1500,
-      expert: 3000
-    };
-    
-    const level = user?.level || "junior";
-    const levels = ["junior", "intermediate", "senior", "expert"];
-    const currentIndex = levels.indexOf(level);
-    
-    if (currentIndex === levels.length - 1) return 100; // Expert is max
-    
-    const currentThreshold = currentLevelThreshold[level as keyof typeof currentLevelThreshold];
-    const nextLevel = levels[currentIndex + 1] as keyof typeof currentLevelThreshold;
-    const nextThreshold = currentLevelThreshold[nextLevel];
-    
-    const progress = ((points - currentThreshold) / (nextThreshold - currentThreshold)) * 100;
-    return Math.min(Math.max(progress, 0), 100);
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Buenos días";
+    if (h < 18) return "Buenas tardes";
+    return "Buenas noches";
   };
 
-  const getNextLevelName = () => {
-    const levels = ["junior", "intermediate", "senior", "expert"];
-    const currentIndex = levels.indexOf(user?.level || "junior");
-    if (currentIndex === levels.length - 1) return "Máximo alcanzado";
-    return levels[currentIndex + 1];
-  };
+  const firstName = user?.name?.split(" ")[0] ?? "Agente";
 
   return (
-    <TrainingDashboardLayout>
-      <div className="p-8 space-y-8">
-        {/* Header */}
+    <div className="p-6 space-y-6 max-w-7xl">
+      {/* Header */}
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
-            ¡Bienvenido, {user?.name?.split(" ")[0] || "Agente"}!
+          <h1 className="text-2xl font-bold text-foreground">
+            {greeting()}, {firstName} 👋
           </h1>
-          <p className="text-muted-foreground mt-1">
-            Aquí está tu resumen de progreso y actividades recientes
+          <p className="text-muted-foreground text-sm mt-1">
+            Aquí está tu resumen de entrenamiento de hoy
           </p>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-primary">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Simulaciones Completadas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {stats?.totalSimulations || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Total de entrenamientos realizados
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-chart-2">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <TrendingUp className="w-4 h-4" />
-                Promedio de Desempeño
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {stats?.averageScore || 0}%
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Puntuación promedio general
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-chart-4">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Trophy className="w-4 h-4" />
-                Badges Obtenidos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {badges.length}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Logros desbloqueados
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-chart-1">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Puntos Totales
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-foreground">
-                {user?.points || 0}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Puntos de experiencia acumulados
-              </p>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-2">
+          <LevelBadge level={profile?.level ?? "junior"} />
+          {(stats?.currentStreak ?? 0) > 0 && (
+            <div className="flex items-center gap-1.5 bg-orange-900/30 text-orange-400 px-3 py-1.5 rounded-full text-sm font-semibold border border-orange-800/40">
+              <Flame className="h-4 w-4" />
+              {stats?.currentStreak} días
+            </div>
+          )}
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Level Progress */}
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Award className="w-5 h-5 text-primary" />
-                Progreso de Nivel
-              </CardTitle>
-              <CardDescription>
-                Nivel actual: <span className="font-semibold capitalize text-foreground">{user?.level || "junior"}</span>
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Progreso hacia {getNextLevelName()}</span>
-                  <span className="font-semibold text-foreground">{Math.round(getLevelProgress())}%</span>
-                </div>
-                <Progress value={getLevelProgress()} className="h-3" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <p className="text-xs text-muted-foreground">Puntos actuales</p>
-                  <p className="text-2xl font-bold text-primary">{user?.points || 0}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Próximo nivel</p>
-                  <p className="text-2xl font-bold text-foreground capitalize">{getNextLevelName()}</p>
-                </div>
-              </div>
+      {/* Metric Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Simulaciones"
+          value={stats?.totalCompleted ?? 0}
+          subtitle="completadas"
+          icon={Target}
+          color="green"
+        />
+        <MetricCard
+          title="Score Promedio"
+          value={`${stats?.avgScore ?? 0}/100`}
+          subtitle="en evaluadas"
+          icon={Star}
+          color="yellow"
+        />
+        <MetricCard
+          title="Racha Actual"
+          value={`${stats?.currentStreak ?? 0} días`}
+          subtitle={stats?.currentStreak ? "¡Sigue así!" : "Comienza hoy"}
+          icon={Flame}
+          color="default"
+        />
+        <MetricCard
+          title="XP Total"
+          value={stats?.xpTotal ?? 0}
+          subtitle="puntos de experiencia"
+          icon={Trophy}
+          color="purple"
+        />
+      </div>
 
-              <Button className="w-full" asChild>
-                <Link href="/gamification" className="flex items-center justify-center gap-2">
-                  Ver Gamificación Completa
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Active Improvement Plan */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Plan de Mejora Activo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {activePlan ? (
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-foreground">{activePlan.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{activePlan.description}</p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Progreso</span>
-                      <span className="font-semibold text-foreground">{activePlan.progress}%</span>
-                    </div>
-                    <Progress value={activePlan.progress} className="h-2" />
-                  </div>
-
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/progress">
-                      Ver Detalles
-                    </Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-8 space-y-3">
-                  <CheckCircle2 className="w-12 h-12 text-muted-foreground mx-auto" />
-                  <p className="text-sm text-muted-foreground">
-                    No tienes planes de mejora activos en este momento
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Simulations */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-primary" />
-              Simulaciones Recientes
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Weekly Progress */}
+        <Card className="bg-card border-border lg:col-span-2">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Progreso Semanal
             </CardTitle>
-            <CardDescription>Tus últimas 5 sesiones de entrenamiento</CardDescription>
           </CardHeader>
           <CardContent>
-            {recentSims.length > 0 ? (
-              <div className="space-y-3">
-                {recentSims.map((sim) => (
-                  <div 
-                    key={sim.id} 
-                    className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent/50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <p className="font-medium text-foreground">Simulación #{sim.id}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(sim.startedAt).toLocaleDateString("es-PY", { 
-                          day: "numeric", 
-                          month: "long", 
-                          year: "numeric" 
-                        })}
-                      </p>
-                    </div>
-                    
-                    {sim.overallScore !== null && (
-                      <div className="text-right mr-4">
-                        <p className="text-2xl font-bold text-primary">{sim.overallScore}%</p>
-                        <p className="text-xs text-muted-foreground">Puntuación</p>
-                      </div>
-                    )}
-                    
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/simulations/${sim.id}`}>
-                        Ver Detalles
-                      </Link>
-                    </Button>
-                  </div>
-                ))}
-              </div>
+            {stats?.weeklyGoal ? (
+              <WeeklyProgress
+                completedDays={(stats.weeklyGoal.completedDays as string[]) ?? []}
+                completedSimulations={stats.weeklyGoal.completedSimulations ?? 0}
+                requiredSimulations={stats.weeklyGoal.requiredSimulations ?? 5}
+              />
             ) : (
-              <div className="text-center py-12 space-y-4">
-                <Target className="w-16 h-16 text-muted-foreground mx-auto" />
-                <div>
-                  <p className="text-lg font-semibold text-foreground">¡Comienza tu primer entrenamiento!</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Explora los escenarios disponibles y mejora tus habilidades
-                  </p>
-                </div>
-                <Button asChild>
-                  <Link href="/scenarios" className="flex items-center gap-2">
-                    Ver Escenarios
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Button>
+              <div className="text-center py-6 text-muted-foreground">
+                <p className="text-sm">Completa tu primera simulación para ver el progreso semanal</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button size="lg" className="h-auto py-6" asChild>
-            <Link href="/scenarios" className="flex flex-col items-center gap-2">
-              <BookOpen className="w-6 h-6" />
-              <span className="font-semibold">Explorar Escenarios</span>
-              <span className="text-xs opacity-90">Encuentra tu próximo desafío</span>
-            </Link>
-          </Button>
-
-          <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/simulations" className="flex flex-col items-center gap-2">
-              <Target className="w-6 h-6" />
-              <span className="font-semibold">Mis Simulaciones</span>
-              <span className="text-xs opacity-90">Revisa tu historial</span>
-            </Link>
-          </Button>
-
-          <Button size="lg" variant="outline" className="h-auto py-6" asChild>
-            <Link href="/progress" className="flex flex-col items-center gap-2">
-              <TrendingUp className="w-6 h-6" />
-              <span className="font-semibold">Ver Progreso</span>
-              <span className="text-xs opacity-90">Analiza tu evolución</span>
-            </Link>
-          </Button>
-        </div>
+        {/* XP Progress */}
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Trophy className="h-4 w-4 text-yellow-400" />
+              Progreso de Nivel
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4">
+            <ScoreCircle score={profile?.progressPercent ?? 0} size="lg" />
+            <div className="text-center">
+              <div className="text-sm font-semibold text-foreground">
+                {profile?.level === "experto" ? "Nivel Máximo" : `Hacia ${profile?.nextLevel ?? "Intermedio"}`}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">
+                {profile?.xpNeeded
+                  ? `${profile.xpNeeded - (profile.xpInLevel ?? 0)} XP para subir de nivel`
+                  : "¡Eres Experto!"}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
-    </TrainingDashboardLayout>
+
+      {/* Recommended Scenario */}
+      {stats?.recommendedScenario && (
+        <Card className="bg-card border-border border-primary/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" />
+              Simulación Recomendada para Ti
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <CategoryBadge category={stats.recommendedScenario.category} />
+                  <DifficultyBadge difficulty={stats.recommendedScenario.difficulty} />
+                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {stats.recommendedScenario.durationMin}-{stats.recommendedScenario.durationMax} min
+                  </span>
+                </div>
+                <h3 className="font-semibold text-foreground">{stats.recommendedScenario.title}</h3>
+                <p className="text-sm text-muted-foreground line-clamp-2">{stats.recommendedScenario.description}</p>
+                <div className="text-xs text-primary font-semibold">
+                  +{stats.recommendedScenario.xpReward} XP al completar
+                </div>
+              </div>
+              <Link href={`/simulaciones/${stats.recommendedScenario.id}`}>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 gap-2 flex-shrink-0">
+                  <Play className="h-4 w-4" />
+                  Iniciar
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Recent Activity */}
+      {(stats?.recentSessions?.length ?? 0) > 0 && (
+        <Card className="bg-card border-border">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold text-foreground flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Actividad Reciente
+            </CardTitle>
+            <Link href="/simulaciones">
+              <Button variant="ghost" size="sm" className="text-primary text-xs gap-1">
+                Ver todas <ArrowRight className="h-3 w-3" />
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {stats?.recentSessions?.map((session: any) => (
+                <div key={session.id} className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors">
+                  <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-medium text-foreground truncate">
+                      Sesión #{session.id}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {session.completedAt
+                        ? formatDistanceToNow(new Date(session.completedAt), { addSuffix: true, locale: es })
+                        : "Reciente"}
+                    </div>
+                  </div>
+                  <div className={cn(
+                    "text-sm font-bold",
+                    (session.overallScore ?? 0) >= 85 ? "text-green-400"
+                      : (session.overallScore ?? 0) >= 70 ? "text-yellow-400"
+                        : "text-red-400"
+                  )}>
+                    {session.overallScore ?? 0}/100
+                  </div>
+                  <div className="text-xs text-primary font-semibold">
+                    +{session.xpEarned ?? 0} XP
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link href="/simulaciones">
+          <div className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:bg-primary/5 group">
+            <div className="w-10 h-10 rounded-lg bg-primary/15 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+              <Play className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-foreground">Nueva Simulación</div>
+              <div className="text-xs text-muted-foreground">Elige un escenario</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+          </div>
+        </Link>
+        <Link href="/desempeno">
+          <div className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:bg-primary/5 group">
+            <div className="w-10 h-10 rounded-lg bg-blue-900/30 flex items-center justify-center group-hover:bg-blue-900/50 transition-colors">
+              <TrendingUp className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-foreground">Mi Desempeño</div>
+              <div className="text-xs text-muted-foreground">Ver análisis detallado</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+          </div>
+        </Link>
+        <Link href="/biblioteca">
+          <div className="bg-card border border-border hover:border-primary/40 rounded-xl p-4 flex items-center gap-3 cursor-pointer transition-all hover:bg-primary/5 group">
+            <div className="w-10 h-10 rounded-lg bg-purple-900/30 flex items-center justify-center group-hover:bg-purple-900/50 transition-colors">
+              <BookOpen className="h-5 w-5 text-purple-400" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold text-foreground">Biblioteca</div>
+              <div className="text-xs text-muted-foreground">Recursos y guías</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+          </div>
+        </Link>
+      </div>
+    </div>
   );
 }

@@ -1,8 +1,8 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "849a221c-82e9-4fb9-8a8e-06c1648139cf",
-  "prevId": "6c5f3d96-b634-401a-a326-f36f57c956a8",
+  "id": "9a44f0c5-79b0-4445-8c0c-0f33649d08e1",
+  "prevId": "2597d72c-23bd-48cf-9cd2-ab6852aabc27",
   "tables": {
     "badges": {
       "name": "badges",
@@ -14,9 +14,16 @@
           "notNull": true,
           "autoincrement": true
         },
+        "key": {
+          "name": "key",
+          "type": "varchar(64)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "name": {
           "name": "name",
-          "type": "varchar(100)",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -25,45 +32,31 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "icon": {
           "name": "icon",
-          "type": "varchar(50)",
+          "type": "varchar(64)",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "category": {
           "name": "category",
-          "type": "enum('empathy','protocol','resolution','crisis','speed','consistency')",
+          "type": "enum('performance','streak','completion','ranking','special')",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "criteria": {
-          "name": "criteria",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "rarity": {
-          "name": "rarity",
-          "type": "enum('common','rare','epic','legendary')",
-          "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
-          "default": "'common'"
+          "default": "'performance'"
         },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
+        "xpBonus": {
+          "name": "xpBonus",
+          "type": "int",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false,
-          "default": "(now())"
+          "default": 0
         }
       },
       "indexes": {},
@@ -76,11 +69,18 @@
           ]
         }
       },
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "badges_key_unique": {
+          "name": "badges_key_unique",
+          "columns": [
+            "key"
+          ]
+        }
+      },
       "checkConstraint": {}
     },
-    "improvement_plans": {
-      "name": "improvement_plans",
+    "daily_activity": {
+      "name": "daily_activity",
       "columns": {
         "id": {
           "name": "id",
@@ -96,116 +96,43 @@
           "notNull": true,
           "autoincrement": false
         },
-        "title": {
-          "name": "title",
-          "type": "varchar(200)",
+        "date": {
+          "name": "date",
+          "type": "varchar(10)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "generatedBy": {
-          "name": "generatedBy",
-          "type": "enum('automatic','supervisor','trainer')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdBy": {
-          "name": "createdBy",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum('active','completed','cancelled')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'active'"
-        },
-        "weaknessAreas": {
-          "name": "weaknessAreas",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "recommendedScenarios": {
-          "name": "recommendedScenarios",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "goals": {
-          "name": "goals",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "progress": {
-          "name": "progress",
+        "simulationsCount": {
+          "name": "simulationsCount",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": 0
         },
-        "startDate": {
-          "name": "startDate",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "targetDate": {
-          "name": "targetDate",
-          "type": "timestamp",
+        "avgScore": {
+          "name": "avgScore",
+          "type": "decimal(5,2)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'0.00'"
         },
-        "completedAt": {
-          "name": "completedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
+        "xpEarned": {
+          "name": "xpEarned",
+          "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(now())"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
-          "default": "(now())"
+          "default": 0
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "improvement_plans_id": {
-          "name": "improvement_plans_id",
+        "daily_activity_id": {
+          "name": "daily_activity_id",
           "columns": [
             "id"
           ]
@@ -214,8 +141,8 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "messages": {
-      "name": "messages",
+    "library_resources": {
+      "name": "library_resources",
       "columns": {
         "id": {
           "name": "id",
@@ -224,16 +151,30 @@
           "notNull": true,
           "autoincrement": true
         },
-        "simulationId": {
-          "name": "simulationId",
-          "type": "int",
+        "title": {
+          "name": "title",
+          "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "role": {
-          "name": "role",
-          "type": "enum('agent','client','system')",
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
+          "type": "enum('empatia','resolucion','protocolo','productos','manejo_objeciones','ventas','cobranzas')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "enum('guia','video','procedimiento','checklist','ficha','referencia')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -242,23 +183,55 @@
           "name": "content",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
-        "timestamp": {
-          "name": "timestamp",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
-        },
-        "evaluationNote": {
-          "name": "evaluationNote",
+        "externalUrl": {
+          "name": "externalUrl",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "readingMinutes": {
+          "name": "readingMinutes",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 5
+        },
+        "rating": {
+          "name": "rating",
+          "type": "decimal(3,1)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.0'"
+        },
+        "totalRatings": {
+          "name": "totalRatings",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "views": {
+          "name": "views",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "isActive": {
+          "name": "isActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -272,8 +245,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "messages_id": {
-          "name": "messages_id",
+        "library_resources_id": {
+          "name": "library_resources_id",
           "columns": [
             "id"
           ]
@@ -294,7 +267,7 @@
         },
         "title": {
           "name": "title",
-          "type": "varchar(200)",
+          "type": "varchar(256)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -303,26 +276,80 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": true,
+          "notNull": false,
           "autoincrement": false
         },
         "category": {
           "name": "category",
-          "type": "enum('informative','transactional','fraud','money_laundering','theft','complaint','credit','digital_channels')",
+          "type": "enum('reclamos','productos','ventas','cobranzas','onboarding','fraude')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "complexity": {
-          "name": "complexity",
-          "type": "int",
+        "difficulty": {
+          "name": "difficulty",
+          "type": "enum('facil','medio','dificil','experto')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "estimatedDuration": {
-          "name": "estimatedDuration",
+        "xpReward": {
+          "name": "xpReward",
           "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 100
+        },
+        "durationMin": {
+          "name": "durationMin",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 5
+        },
+        "durationMax": {
+          "name": "durationMax",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 10
+        },
+        "clientName": {
+          "name": "clientName",
+          "type": "varchar(128)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "clientPersona": {
+          "name": "clientPersona",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "clientTone": {
+          "name": "clientTone",
+          "type": "enum('neutral','molesto','urgente','amable','desconfiado','ansioso')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'neutral'"
+        },
+        "clientGender": {
+          "name": "clientGender",
+          "type": "enum('masculino','femenino')",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'masculino'"
+        },
+        "initialMessage": {
+          "name": "initialMessage",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -334,48 +361,83 @@
           "notNull": true,
           "autoincrement": false
         },
-        "clientProfile": {
-          "name": "clientProfile",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "evaluationCriteria": {
-          "name": "evaluationCriteria",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "idealResponse": {
-          "name": "idealResponse",
+        "idealResponseHints": {
+          "name": "idealResponseHints",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "tags": {
-          "name": "tags",
-          "type": "text",
+        "empathyWeight": {
+          "name": "empathyWeight",
+          "type": "decimal(3,2)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.20'"
+        },
+        "clarityWeight": {
+          "name": "clarityWeight",
+          "type": "decimal(3,2)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.20'"
+        },
+        "protocolWeight": {
+          "name": "protocolWeight",
+          "type": "decimal(3,2)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.20'"
+        },
+        "resolutionWeight": {
+          "name": "resolutionWeight",
+          "type": "decimal(3,2)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.20'"
+        },
+        "professionalismWeight": {
+          "name": "professionalismWeight",
+          "type": "decimal(3,2)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'0.20'"
+        },
+        "competencies": {
+          "name": "competencies",
+          "type": "json",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "isActive": {
-          "name": "isActive",
+        "totalCompleted": {
+          "name": "totalCompleted",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1
+          "default": 0
         },
-        "createdBy": {
-          "name": "createdBy",
-          "type": "int",
+        "avgScore": {
+          "name": "avgScore",
+          "type": "decimal(5,2)",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false
+          "autoincrement": false,
+          "default": "'0.00'"
+        },
+        "isActive": {
+          "name": "isActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "createdAt": {
           "name": "createdAt",
@@ -383,15 +445,6 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "(now())"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "onUpdate": true,
           "default": "(now())"
         }
       },
@@ -408,8 +461,68 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "simulations": {
-      "name": "simulations",
+    "simulation_messages": {
+      "name": "simulation_messages",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "sessionId": {
+          "name": "sessionId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "enum('agent','client')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(now())"
+        },
+        "audioUrl": {
+          "name": "audioUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "simulation_messages_id": {
+          "name": "simulation_messages_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "checkConstraint": {}
+    },
+    "simulation_sessions": {
+      "name": "simulation_sessions",
       "columns": {
         "id": {
           "name": "id",
@@ -440,6 +553,14 @@
           "autoincrement": false,
           "default": "'in_progress'"
         },
+        "isPracticeMode": {
+          "name": "isPracticeMode",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
         "startedAt": {
           "name": "startedAt",
           "type": "timestamp",
@@ -455,16 +576,9 @@
           "notNull": false,
           "autoincrement": false
         },
-        "duration": {
-          "name": "duration",
+        "durationSeconds": {
+          "name": "durationSeconds",
           "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "transcript": {
-          "name": "transcript",
-          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -476,70 +590,97 @@
           "notNull": false,
           "autoincrement": false
         },
-        "categoryScores": {
-          "name": "categoryScores",
-          "type": "text",
+        "empathyScore": {
+          "name": "empathyScore",
+          "type": "int",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "feedback": {
-          "name": "feedback",
-          "type": "text",
+        "clarityScore": {
+          "name": "clarityScore",
+          "type": "int",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "protocolScore": {
+          "name": "protocolScore",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "resolutionScore": {
+          "name": "resolutionScore",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "professionalismScore": {
+          "name": "professionalismScore",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "xpEarned": {
+          "name": "xpEarned",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
         },
         "strengths": {
           "name": "strengths",
-          "type": "text",
+          "type": "json",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "weaknesses": {
           "name": "weaknesses",
-          "type": "text",
+          "type": "json",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
         "recommendations": {
           "name": "recommendations",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "aiFeedbackSummary": {
+          "name": "aiFeedbackSummary",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "pointsEarned": {
-          "name": "pointsEarned",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
-        },
-        "badgesEarned": {
-          "name": "badgesEarned",
+        "audioUrl": {
+          "name": "audioUrl",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
+        "transcription": {
+          "name": "transcription",
+          "type": "text",
           "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(now())"
+          "notNull": false,
+          "autoincrement": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "simulations_id": {
-          "name": "simulations_id",
+        "simulation_sessions_id": {
+          "name": "simulation_sessions_id",
           "columns": [
             "id"
           ]
@@ -548,8 +689,8 @@
       "uniqueConstraints": {},
       "checkConstraint": {}
     },
-    "team_stats": {
-      "name": "team_stats",
+    "teams": {
+      "name": "teams",
       "columns": {
         "id": {
           "name": "id",
@@ -558,9 +699,9 @@
           "notNull": true,
           "autoincrement": true
         },
-        "department": {
-          "name": "department",
-          "type": "varchar(100)",
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -572,56 +713,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "period": {
-          "name": "period",
-          "type": "enum('daily','weekly','monthly')",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "periodDate": {
-          "name": "periodDate",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "totalSimulations": {
-          "name": "totalSimulations",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "averageScore": {
-          "name": "averageScore",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "topPerformers": {
-          "name": "topPerformers",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "commonWeaknesses": {
-          "name": "commonWeaknesses",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "improvementRate": {
-          "name": "improvementRate",
-          "type": "int",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "createdAt": {
           "name": "createdAt",
           "type": "timestamp",
@@ -634,8 +725,8 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {
-        "team_stats_id": {
-          "name": "team_stats_id",
+        "teams_id": {
+          "name": "teams_id",
           "columns": [
             "id"
           ]
@@ -676,8 +767,8 @@
           "autoincrement": false,
           "default": "(now())"
         },
-        "simulationId": {
-          "name": "simulationId",
+        "sessionId": {
+          "name": "sessionId",
           "type": "int",
           "primaryKey": false,
           "notNull": false,
@@ -737,45 +828,61 @@
         },
         "role": {
           "name": "role",
-          "type": "enum('user','admin','agent','supervisor','trainer')",
+          "type": "enum('gerente','supervisor','coordinador','analista','agente','admin')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": "'agent'"
+          "default": "'agente'"
         },
-        "department": {
-          "name": "department",
-          "type": "varchar(100)",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "supervisorId": {
-          "name": "supervisorId",
+        "teamId": {
+          "name": "teamId",
           "type": "int",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "level": {
-          "name": "level",
-          "type": "enum('junior','intermediate','senior','expert')",
+        "avatarUrl": {
+          "name": "avatarUrl",
+          "type": "text",
           "primaryKey": false,
           "notNull": false,
-          "autoincrement": false,
-          "default": "'junior'"
+          "autoincrement": false
         },
-        "points": {
-          "name": "points",
+        "xpTotal": {
+          "name": "xpTotal",
           "type": "int",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": 0
         },
-        "badges": {
-          "name": "badges",
-          "type": "text",
+        "level": {
+          "name": "level",
+          "type": "enum('junior','intermedio','senior','experto')",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'junior'"
+        },
+        "currentStreak": {
+          "name": "currentStreak",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "maxStreak": {
+          "name": "maxStreak",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "lastActivityDate": {
+          "name": "lastActivityDate",
+          "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -824,6 +931,68 @@
           ]
         }
       },
+      "checkConstraint": {}
+    },
+    "weekly_goals": {
+      "name": "weekly_goals",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "userId": {
+          "name": "userId",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "weekStart": {
+          "name": "weekStart",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "requiredSimulations": {
+          "name": "requiredSimulations",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 5
+        },
+        "completedSimulations": {
+          "name": "completedSimulations",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "completedDays": {
+          "name": "completedDays",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "('[]')"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "weekly_goals_id": {
+          "name": "weekly_goals_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
       "checkConstraint": {}
     }
   },
