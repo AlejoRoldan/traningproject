@@ -1,0 +1,5 @@
+[build]
+builder = "dockerfile"
+
+[deploy]
+startCommand = "node --experimental-specifier-resolution=node dist/index.js"

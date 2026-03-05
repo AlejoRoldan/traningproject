@@ -13,7 +13,7 @@ COPY package.json ./
 
 # Install dependencies
 RUN npm install -g pnpm@10.4.1
-RUN pnpm install
+RUN pnpm install --no-frozen-lockfile
 
 # Copy all source code
 COPY tsconfig.json vite.config.ts next.config.ts ./
