@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
-// Initialize OpenAI client with user's API key
+// Initialize OpenAI client - use placeholder if key not set (when Anthropic is primary provider)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'placeholder-not-used',
 });
 
 export interface ChatMessage {

@@ -1,8 +1,8 @@
 import OpenAI from "openai";
 
-// Inicializar cliente de OpenAI
+// Inicializar cliente de OpenAI - placeholder si no está configurada (cuando se usa Anthropic como proveedor principal)
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'placeholder-not-used',
 });
 
 /**
