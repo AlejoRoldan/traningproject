@@ -83,62 +83,78 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="min-h-screen bg-background p-8 md:p-10 lg:p-12">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-slate-900 mb-2">Panel de Administración</h1>
-          <p className="text-slate-600">Monitoreo y control de la plataforma Kaitel Training</p>
+        <div className="mb-10 space-y-3">
+          <h1 className="text-5xl font-bold text-foreground tracking-tight">Panel de Administración</h1>
+          <p className="text-lg text-muted-foreground max-w-2xl">Monitoreo y control de la plataforma Training</p>
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Agentes Totales</CardTitle>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+          <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-primary to-primary/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Users className="w-4 h-4 text-primary" />
+                Agentes
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{dashboardSummary.total_agents}</div>
-              <p className="text-xs text-slate-500 mt-1">Activos en el sistema</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">{dashboardSummary.total_agents}</div>
+              <p className="text-sm text-muted-foreground">Activos en el sistema</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Simulaciones</CardTitle>
+          <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-2 to-chart-2/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-chart-2" />
+                Simulaciones
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{dashboardSummary.total_simulations}</div>
-              <p className="text-xs text-slate-500 mt-1">Completadas en total</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">{dashboardSummary.total_simulations}</div>
+              <p className="text-sm text-muted-foreground">Completadas en total</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-purple-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Promedio General</CardTitle>
+          <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-chart-4 to-chart-4/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <Zap className="w-4 h-4 text-chart-4" />
+                Promedio
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-slate-900">{dashboardSummary.avg_score}%</div>
-              <p className="text-xs text-slate-500 mt-1">Score promedio</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-foreground">{dashboardSummary.avg_score}%</div>
+              <p className="text-sm text-muted-foreground">Score promedio general</p>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-red-500">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-slate-600">Agentes en Riesgo</CardTitle>
+          <Card className="relative overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-destructive to-destructive/50"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                Riesgo
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-red-600">{dashboardSummary.agents_at_risk}</div>
-              <p className="text-xs text-slate-500 mt-1">Requieren atención</p>
+            <CardContent className="space-y-3">
+              <div className="text-4xl font-bold text-destructive">{dashboardSummary.agents_at_risk}</div>
+              <p className="text-sm text-muted-foreground">Agentes requieren atención</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Alerts */}
         {dashboardSummary.active_alerts > 0 && (
-          <Alert className="mb-8 border-red-200 bg-red-50">
-            <AlertTriangle className="h-4 w-4 text-red-600" />
-            <AlertDescription className="text-red-800">
+          <Alert className="mb-8 border-destructive/30 bg-destructive/10">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <AlertDescription className="text-destructive">
               Hay <strong>{dashboardSummary.active_alerts} alertas activas</strong> que requieren atención inmediata.
             </AlertDescription>
           </Alert>
@@ -167,13 +183,13 @@ export default function AdminDashboard() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={dailyActivity}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="date" stroke="var(--muted-foreground)" />
+                      <YAxis stroke="var(--muted-foreground)" />
+                      <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)' }} />
                       <Legend />
-                      <Line type="monotone" dataKey="simulations" stroke="#3b82f6" name="Simulaciones" />
-                      <Line type="monotone" dataKey="avg_score" stroke="#10b981" name="Score Promedio" />
+                      <Line type="monotone" dataKey="simulations" stroke="#26D07C" strokeWidth={2} name="Simulaciones" />
+                      <Line type="monotone" dataKey="avg_score" stroke="#7183F5" strokeWidth={2} name="Score Promedio" />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -190,11 +206,11 @@ export default function AdminDashboard() {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={categoryData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                      <YAxis />
-                      <Tooltip />
-                      <Bar dataKey="mastery" fill="#8b5cf6" name="% Dominio" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} stroke="var(--muted-foreground)" />
+                      <YAxis stroke="var(--muted-foreground)" />
+                      <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)' }} />
+                      <Bar dataKey="mastery" fill="#26D07C" name="% Dominio" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -219,10 +235,10 @@ export default function AdminDashboard() {
                       label
                     >
                       {categoryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={['#e91e8c', '#ff6b9d', '#00d4ff', '#ffd700', '#8b4789', '#ff4444'][index]} />
+                        <Cell key={`cell-${index}`} fill={['#26D07C', '#7183F5', '#FF6B6B', '#FFB84D', '#26D07C', '#FF8C42'][index]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </CardContent>
@@ -239,17 +255,17 @@ export default function AdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {departmentData.map((dept) => (
-                    <div key={dept.department} className="p-4 border rounded-lg hover:bg-slate-50 transition">
+                    <div key={dept.department} className="p-4 border border-border/50 rounded-lg hover:bg-accent/50 hover:shadow-sm transition-all duration-200">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="font-semibold text-slate-900">{dept.department}</h3>
+                        <h3 className="font-semibold text-foreground">{dept.department}</h3>
                         {dept.risk > 0 && (
                           <Badge variant="destructive">{dept.risk} en riesgo</Badge>
                         )}
                       </div>
                       <div className="grid grid-cols-4 gap-4 text-sm">
                         <div>
-                          <p className="text-slate-600">Agentes</p>
-                          <p className="text-lg font-bold text-slate-900">{dept.agents}</p>
+                          <p className="text-muted-foreground">Agentes</p>
+                          <p className="text-lg font-bold text-foreground">{dept.agents}</p>
                         </div>
                         <div>
                           <p className="text-slate-600">Simulaciones</p>

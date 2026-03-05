@@ -73,64 +73,66 @@ export default function TrainingDashboardLayout({ children }: { children: React.
   return (
     <div className="min-h-screen flex bg-background">
       {/* Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex flex-col">
+      <aside className="w-64 bg-card border-r border-border/50 flex flex-col shadow-sm">
         {/* Logo/Brand */}
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border/50 bg-gradient-to-br from-primary/5 to-transparent">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-white font-bold text-xl">K</span>
+            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-xl">I</span>
             </div>
             <div>
-              <h1 className="font-bold text-lg text-foreground">Kaitel Training</h1>
+              <h1 className="font-bold text-lg text-foreground">Training</h1>
               <p className="text-xs text-muted-foreground">Powered by Itti</p>
             </div>
           </div>
         </div>
 
         {/* User Profile Card */}
-        <div className="p-4 border-b border-border bg-accent/30">
-          <div className="flex items-center gap-3 mb-3">
-            <Avatar className="w-10 h-10 bg-primary/10">
-              <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+        <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="w-11 h-11 bg-primary/15 border-2 border-primary/20">
+              <AvatarFallback className="bg-primary/15 text-primary font-bold text-sm">
                 {getInitials(currentUser.name || "Usuario")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground truncate">{currentUser.name}</p>
+              <p className="text-sm font-bold text-foreground truncate">{currentUser.name}</p>
               <p className="text-xs text-muted-foreground capitalize">{currentUser.role}</p>
             </div>
           </div>
-          
-          <div className="space-y-2">
+
+          <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Nivel:</span>
-              <span className={getLevelColor(currentUser.level || "junior")}>{currentUser.level || "junior"}</span>
+              <span className="font-medium text-muted-foreground">Nivel</span>
+              <span className={`font-bold ${getLevelColor(currentUser.level || "junior")}`}>
+                {currentUser.level || "junior"}
+              </span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Puntos:</span>
-              <span className="font-semibold text-primary">{currentUser.points}</span>
+              <span className="font-medium text-muted-foreground">Puntos</span>
+              <span className="font-bold text-primary">{currentUser.points}</span>
             </div>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.href;
-            
+
             return (
               <Link key={item.href} href={item.href}>
                 <Button
                   variant={isActive ? "default" : "ghost"}
-                  className={`w-full justify-start gap-3 ${
-                    isActive 
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
-                      : "hover:bg-accent"
+                  className={`w-full justify-start gap-3 rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md hover:bg-primary/95"
+                      : "text-foreground hover:bg-accent/50"
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span className="font-medium">{item.label}</span>
                 </Button>
               </Link>
             );
@@ -138,15 +140,15 @@ export default function TrainingDashboardLayout({ children }: { children: React.
         </nav>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-border space-y-2">
+        <div className="p-3 border-t border-border/50 space-y-2 bg-gradient-to-t from-background/50 to-transparent">
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3"
+            className="w-full justify-start gap-3 rounded-lg hover:bg-accent/50 transition-colors"
             asChild
           >
             <Link href="/settings">
-              <Settings className="w-5 h-5" />
-              <span>Configuración</span>
+              <Settings className="w-5 h-5 shrink-0" />
+              <span className="font-medium">Configuración</span>
             </Link>
           </Button>
         </div>
