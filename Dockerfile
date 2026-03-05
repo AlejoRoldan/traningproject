@@ -13,7 +13,7 @@ COPY package.json pnpm-lock.yaml ./
 
 # Install dependencies
 RUN npm install -g pnpm@10.4.1
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
 # Copy all source code
 COPY tsconfig.json vite.config.ts next.config.ts ./
