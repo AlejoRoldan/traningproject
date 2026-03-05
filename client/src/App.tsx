@@ -1,66 +1,38 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, Redirect } from "wouter";
+import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import KaitelLayout from "./components/KaitelLayout";
 import Dashboard from "./pages/Dashboard";
-import Scenarios from "./pages/Scenarios";
-import SimulationSession from "./pages/SimulationSession";
 import Simulations from "./pages/Simulations";
-import SimulationDetail from "./pages/SimulationDetail";
-import Progress from "./pages/Progress";
-import Gamification from "./pages/Gamification";
-import Team from "./pages/Team";
-import ResponseLibrary from "./pages/ResponseLibrary";
-import Coaching from "./pages/Coaching";
-import Analytics from "./pages/Analytics";
-import CasosModelo from "./pages/CasosModelo";
-import AdminDashboard from "./pages/AdminDashboard";
-import AdminConfig from "./pages/AdminConfig";
-import { FeedbackInbox } from "./pages/FeedbackInbox";
+import SimulationSession from "./pages/SimulationSession";
+import Performance from "./pages/Performance";
+import Ranking from "./pages/Ranking";
+import Library from "./pages/Library";
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/">
-        <Redirect to="/dashboard" />
-      </Route>
-      <Route path="/dashboard" component={Dashboard} />
-      <Route path="/scenarios" component={Scenarios} />
-      <Route path="/scenarios/:id" component={Scenarios} />
-      <Route path="/simulation/start/:scenarioId" component={SimulationSession} />
-      <Route path="/simulations" component={Simulations} />
-      <Route path="/simulations/:id" component={SimulationDetail} />
-      <Route path="/progress" component={Progress} />
-      <Route path="/gamification" component={Gamification} />
-      <Route path="/team" component={Team} />
-      <Route path="/response-library" component={ResponseLibrary} />
-      <Route path="/coaching" component={Coaching} />
-      <Route path="/analytics" component={Analytics} />
-      <Route path="/casos-modelo" component={CasosModelo} />
-      <Route path="/admin/dashboard" component={AdminDashboard} />
-      <Route path="/admin/config" component={AdminConfig} />
-      <Route path="/feedback/inbox" component={FeedbackInbox} />
-      <Route path="/404" component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <KaitelLayout>
+      <Switch>
+        <Route path="/" component={Dashboard} />
+        <Route path="/simulaciones" component={Simulations} />
+        <Route path="/simulaciones/:id" component={SimulationSession} />
+        <Route path="/desempeno" component={Performance} />
+        <Route path="/ranking" component={Ranking} />
+        <Route path="/biblioteca" component={Library} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </KaitelLayout>
   );
 }
-
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
           <Router />

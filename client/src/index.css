@@ -43,79 +43,43 @@
 }
 
 :root {
-  /* Kaitel Brand Colors: Magenta/Pink and Blue */
-  --primary: oklch(0.65 0.22 340); /* #E91E8C Kaitel Magenta */
-  --primary-foreground: oklch(1 0 0);
-  --sidebar-primary: oklch(0.65 0.22 340); /* Kaitel Magenta */
-  --sidebar-primary-foreground: oklch(1 0 0);
-  /* Kaitel color palette for charts */
-  --chart-1: oklch(0.80 0.18 340); /* Light magenta */
-  --chart-2: oklch(0.65 0.22 340); /* Kaitel magenta */
-  --chart-3: oklch(0.50 0.20 340); /* Dark magenta */
-  --chart-4: oklch(0.60 0.18 260); /* Kaitel blue */
-  --chart-5: oklch(0.45 0.15 260); /* Dark blue */
-  --radius: 0.75rem; /* Itti rounded corners */
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.235 0.015 65);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.235 0.015 65);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.235 0.015 65);
-  --secondary: oklch(0.98 0.001 286.375);
-  --secondary-foreground: oklch(0.4 0.015 65);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.141 0.005 285.823);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.623 0.214 259.815);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.235 0.015 65);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.623 0.214 259.815);
+  --radius: 0.625rem;
+  /* Kaitel Dark Corporate Theme */
+  --background: oklch(0.13 0.01 240);
+  --foreground: oklch(0.95 0.01 240);
+  --card: oklch(0.17 0.01 240);
+  --card-foreground: oklch(0.95 0.01 240);
+  --popover: oklch(0.17 0.01 240);
+  --popover-foreground: oklch(0.95 0.01 240);
+  --primary: oklch(0.75 0.18 160);
+  --primary-foreground: oklch(0.13 0.01 240);
+  --secondary: oklch(0.22 0.01 240);
+  --secondary-foreground: oklch(0.85 0.01 240);
+  --muted: oklch(0.20 0.01 240);
+  --muted-foreground: oklch(0.55 0.02 240);
+  --accent: oklch(0.22 0.02 240);
+  --accent-foreground: oklch(0.95 0.01 240);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.95 0 0);
+  --border: oklch(0.25 0.01 240);
+  --input: oklch(0.22 0.01 240);
+  --ring: oklch(0.75 0.18 160);
+  --chart-1: oklch(0.75 0.18 160);
+  --chart-2: oklch(0.65 0.15 230);
+  --chart-3: oklch(0.82 0.18 85);
+  --chart-4: oklch(0.65 0.18 290);
+  --chart-5: oklch(0.60 0.22 25);
+  --sidebar: oklch(0.11 0.01 240);
+  --sidebar-foreground: oklch(0.85 0.01 240);
+  --sidebar-primary: oklch(0.75 0.18 160);
+  --sidebar-primary-foreground: oklch(0.13 0.01 240);
+  --sidebar-accent: oklch(0.18 0.01 240);
+  --sidebar-accent-foreground: oklch(0.95 0.01 240);
+  --sidebar-border: oklch(0.20 0.01 240);
+  --sidebar-ring: oklch(0.75 0.18 160);
 }
 
-.dark {
-  /* Kaitel Brand Colors for dark mode */
-  --primary: oklch(0.75 0.20 340); /* Lighter magenta for dark mode */
-  --primary-foreground: oklch(0.1 0 0);
-  --sidebar-primary: oklch(0.65 0.22 340); /* Kaitel Magenta */
-  --sidebar-primary-foreground: oklch(1 0 0);
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.85 0.005 65);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.85 0.005 65);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.85 0.005 65);
-  --secondary: oklch(0.24 0.006 286.033);
-  --secondary-foreground: oklch(0.7 0.005 65);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground:  oklch(0.92 0.005 65);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.488 0.243 264.376);
-  /* Kaitel color palette for charts in dark mode */
-  --chart-1: oklch(0.80 0.18 340); /* Light magenta */
-  --chart-2: oklch(0.65 0.22 340); /* Kaitel magenta */
-  --chart-3: oklch(0.50 0.20 340); /* Dark magenta */
-  --chart-4: oklch(0.60 0.18 260); /* Kaitel blue */
-  --chart-5: oklch(0.45 0.15 260); /* Dark blue */
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.85 0.005 65);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground:  oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.488 0.243 264.376);
-}
+/* Dark mode inherits same theme since we default to dark */
 
 @layer base {
   * {
@@ -179,3 +143,66 @@
     }
   }
 }
+/* ─── Kaitel Custom Styles ──────────────────────────────────────────────────── */
+
+/* Difficulty Badges */
+.diff-facil { @apply bg-green-900/40 text-green-400 border border-green-800/50; }
+.diff-medio { @apply bg-yellow-900/40 text-yellow-400 border border-yellow-800/50; }
+.diff-dificil { @apply bg-orange-900/40 text-orange-400 border border-orange-800/50; }
+.diff-experto { @apply bg-red-900/40 text-red-400 border border-red-800/50; }
+
+/* Category Badges */
+.cat-reclamos { @apply bg-red-900/30 text-red-400; }
+.cat-productos { @apply bg-blue-900/30 text-blue-400; }
+.cat-ventas { @apply bg-green-900/30 text-green-400; }
+.cat-cobranzas { @apply bg-orange-900/30 text-orange-400; }
+.cat-onboarding { @apply bg-purple-900/30 text-purple-400; }
+.cat-fraude { @apply bg-pink-900/30 text-pink-400; }
+
+/* Level Badges */
+.level-junior { @apply bg-gray-800 text-gray-300; }
+.level-intermedio { @apply bg-blue-900/50 text-blue-300; }
+.level-senior { @apply bg-purple-900/50 text-purple-300; }
+.level-experto { @apply bg-yellow-900/50 text-yellow-300; }
+
+/* XP Badge */
+.xp-badge {
+  background: linear-gradient(135deg, oklch(0.75 0.18 160), oklch(0.60 0.15 160));
+  @apply text-black font-bold text-xs px-2 py-0.5 rounded-full;
+}
+
+/* Glow effect */
+.glow-green {
+  box-shadow: 0 0 20px oklch(0.75 0.18 160 / 0.2);
+}
+
+/* Chat bubbles */
+.chat-bubble-agent {
+  @apply bg-primary/15 border border-primary/25 rounded-2xl rounded-br-sm px-4 py-3;
+}
+.chat-bubble-client {
+  @apply bg-secondary border border-border rounded-2xl rounded-bl-sm px-4 py-3;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: oklch(0.30 0.02 240); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.40 0.02 240); }
+
+/* Progress bar */
+.progress-bar-fill {
+  background: linear-gradient(90deg, oklch(0.65 0.15 160), oklch(0.75 0.18 160));
+  @apply h-full rounded-full transition-all duration-500;
+}
+
+/* Animated typing indicator */
+@keyframes bounce-dot {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+.typing-dot {
+  animation: bounce-dot 1.4s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
