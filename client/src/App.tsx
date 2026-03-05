@@ -19,6 +19,7 @@ import CasosModelo from "./pages/CasosModelo";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminConfig from "./pages/AdminConfig";
 import { FeedbackInbox } from "./pages/FeedbackInbox";
+import Login from "./pages/Login";
 
 function Router() {
   return (
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/config" component={AdminConfig} />
       <Route path="/feedback/inbox" component={FeedbackInbox} />
+      <Route path="/login" component={Login} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
