@@ -1,3 +1,4 @@
+import TrainingDashboardLayout from "@/components/TrainingDashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -17,17 +18,20 @@ export default function Analytics() {
 
   if (statsLoading || categoryLoading || timeSeriesLoading || leaderboardLoading) {
     return (
-      <div className="container mx-auto py-8">
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Cargando analíticas...</p>
+      <TrainingDashboardLayout>
+        <div className="container mx-auto py-8">
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Cargando analíticas...</p>
+          </div>
         </div>
-      </div>
+      </TrainingDashboardLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="p-8 md:p-10 lg:p-12 space-y-10">
+    <TrainingDashboardLayout>
+      <div className="min-h-screen bg-background">
+        <div className="p-8 md:p-10 lg:p-12 space-y-10">
         <div className="flex justify-between items-start">
           <div className="space-y-3">
             <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">Analíticas</h1>
@@ -280,5 +284,7 @@ export default function Analytics() {
         </Tabs>
         </div>
       </div>
+      </div>
+    </TrainingDashboardLayout>
   );
 }

@@ -278,6 +278,7 @@ export default function Team() {
           </Card>
         </div>
       </div>
+      </div>
     </TrainingDashboardLayout>
   );
 }
