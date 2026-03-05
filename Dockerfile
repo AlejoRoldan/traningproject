@@ -1,5 +1,6 @@
 # Multi-stage build for full-stack application
 # Stage 1: Builder
+# Rebuild trigger - fixing pnpm lockfile issues
 FROM node:22.13.0-alpine AS builder
 
 WORKDIR /app
