@@ -13,6 +13,7 @@ import { nanoid } from "nanoid";
 import { getDb } from "./db";
 import { scenarios, simulations, messages, improvementPlans, badges, userBadges, audioMarkers, responseTemplates, users } from "../drizzle/schema";
 import { eq, desc, and, sql, gte, isNotNull, or } from "drizzle-orm";
+import { withCache, CACHE_STRATEGIES, CacheInvalidationService } from "./cache/caching.middleware";
 
 
 
@@ -802,81 +803,90 @@ export const appRouter = router({
         department: z.string().optional(),
       }).optional())
       .query(async ({ input }) => {
-        const db = await getDb();
-        if (!db) throw new Error('Database connection failed');
+        const cacheKey = `analytics:overall:${input?.userId || 'all'}`;
 
-        // Build where conditions based on filters
-        const whereConditions = [];
-        
-        if (input?.userId) {
-          whereConditions.push(eq(simulations.userId, input.userId));
-        }
+        return await withCache(
+          cacheKey,
+          CACHE_STRATEGIES.analytics.ttl,
+          async () => {
+            const db = await getDb();
+            if (!db) throw new Error('Database connection failed');
 
-        // Total simulations
-        const [totalResult] = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(simulations)
-          .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
-        const totalSimulations = totalResult?.count || 0;
+            // Build where conditions based on filters
+            const whereConditions = [];
 
-        // Completed simulations
-        const [completedResult] = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(simulations)
-          .where(
-            whereConditions.length > 0
-              ? and(eq(simulations.status, 'completed'), ...whereConditions)
-              : eq(simulations.status, 'completed')
-          );
-        const completedSimulations = completedResult?.count || 0;
+            if (input?.userId) {
+              whereConditions.push(eq(simulations.userId, input.userId));
+            }
 
-        // Average score
-        const [avgScoreResult] = await db
-          .select({ avg: sql<number>`avg(${simulations.overallScore})` })
-          .from(simulations)
-          .where(
-            whereConditions.length > 0
-              ? and(eq(simulations.status, 'completed'), ...whereConditions)
-              : eq(simulations.status, 'completed')
-          );
-        const averageScore = Math.round(avgScoreResult?.avg || 0);
+            // Total simulations
+            const [totalResult] = await db
+              .select({ count: sql<number>`count(*)` })
+              .from(simulations)
+              .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+            const totalSimulations = totalResult?.count || 0;
 
-        // Active users
-        const [activeUsersResult] = await db
-          .select({ count: sql<number>`count(distinct ${simulations.userId})` })
-          .from(simulations)
-          .where(
-            whereConditions.length > 0
-              ? and(eq(simulations.status, 'completed'), ...whereConditions)
-              : eq(simulations.status, 'completed')
-          );
-        const activeUsers = activeUsersResult?.count || 0;
+            // Completed simulations
+            const [completedResult] = await db
+              .select({ count: sql<number>`count(*)` })
+              .from(simulations)
+              .where(
+                whereConditions.length > 0
+                  ? and(eq(simulations.status, 'completed'), ...whereConditions)
+                  : eq(simulations.status, 'completed')
+              );
+            const completedSimulations = completedResult?.count || 0;
 
-        // Average duration (in minutes)
-        const [avgDurationResult] = await db
-          .select({ avg: sql<number>`avg(${simulations.duration})` })
-          .from(simulations)
-          .where(
-            whereConditions.length > 0
-              ? and(
-                  eq(simulations.status, 'completed'),
-                  isNotNull(simulations.duration),
-                  ...whereConditions
-                )
-              : and(
-                  eq(simulations.status, 'completed'),
-                  isNotNull(simulations.duration)
-                )
-          );
-        const averageDuration = Math.round(avgDurationResult?.avg || 0);
+            // Average score
+            const [avgScoreResult] = await db
+              .select({ avg: sql<number>`avg(${simulations.overallScore})` })
+              .from(simulations)
+              .where(
+                whereConditions.length > 0
+                  ? and(eq(simulations.status, 'completed'), ...whereConditions)
+                  : eq(simulations.status, 'completed')
+              );
+            const averageScore = Math.round(avgScoreResult?.avg || 0);
 
-        return {
-          totalSimulations,
-          completedSimulations,
-          averageScore,
-          activeUsers,
-          averageDuration
-        };
+            // Active users
+            const [activeUsersResult] = await db
+              .select({ count: sql<number>`count(distinct ${simulations.userId})` })
+              .from(simulations)
+              .where(
+                whereConditions.length > 0
+                  ? and(eq(simulations.status, 'completed'), ...whereConditions)
+                  : eq(simulations.status, 'completed')
+              );
+            const activeUsers = activeUsersResult?.count || 0;
+
+            // Average duration (in minutes)
+            const [avgDurationResult] = await db
+              .select({ avg: sql<number>`avg(${simulations.duration})` })
+              .from(simulations)
+              .where(
+                whereConditions.length > 0
+                  ? and(
+                      eq(simulations.status, 'completed'),
+                      isNotNull(simulations.duration),
+                      ...whereConditions
+                    )
+                  : and(
+                      eq(simulations.status, 'completed'),
+                      isNotNull(simulations.duration)
+                    )
+              );
+            const averageDuration = Math.round(avgDurationResult?.avg || 0);
+
+            return {
+              totalSimulations,
+              completedSimulations,
+              averageScore,
+              activeUsers,
+              averageDuration
+            };
+          },
+          CACHE_STRATEGIES.analytics.tags
+        );
       }),
 
     getCategoryPerformance: demoUserProcedure
@@ -885,27 +895,36 @@ export const appRouter = router({
         department: z.string().optional(),
       }).optional())
       .query(async ({ input }) => {
-        const db = await getDb();
-        if (!db) throw new Error('Database connection failed');
+        const cacheKey = `analytics:category:${input?.userId || 'all'}`;
 
-        const whereConditions = [eq(simulations.status, 'completed')];
-        
-        if (input?.userId) {
-          whereConditions.push(eq(simulations.userId, input.userId));
-        }
+        return await withCache(
+          cacheKey,
+          CACHE_STRATEGIES.analytics.ttl,
+          async () => {
+            const db = await getDb();
+            if (!db) throw new Error('Database connection failed');
 
-        const results = await db
-          .select({
-            category: scenarios.category,
-            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
-            totalAttempts: sql<number>`count(*)`
-          })
-          .from(simulations)
-          .innerJoin(scenarios, eq(simulations.scenarioId, scenarios.id))
-          .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-          .groupBy(scenarios.category);
+            const whereConditions = [eq(simulations.status, 'completed')];
 
-        return results;
+            if (input?.userId) {
+              whereConditions.push(eq(simulations.userId, input.userId));
+            }
+
+            const results = await db
+              .select({
+                category: scenarios.category,
+                averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+                totalAttempts: sql<number>`count(*)`
+              })
+              .from(simulations)
+              .innerJoin(scenarios, eq(simulations.scenarioId, scenarios.id))
+              .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+              .groupBy(scenarios.category);
+
+            return results;
+          },
+          CACHE_STRATEGIES.analytics.tags
+        );
       }),
 
     getTimeSeriesData: demoUserProcedure
@@ -914,34 +933,43 @@ export const appRouter = router({
         department: z.string().optional(),
       }).optional())
       .query(async ({ input }) => {
-        const db = await getDb();
-        if (!db) throw new Error('Database connection failed');
+        const cacheKey = `analytics:timeseries:${input?.userId || 'all'}`;
 
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        return await withCache(
+          cacheKey,
+          CACHE_STRATEGIES.analytics.ttl,
+          async () => {
+            const db = await getDb();
+            if (!db) throw new Error('Database connection failed');
 
-        const whereConditions = [
-          eq(simulations.status, 'completed'),
-          isNotNull(simulations.completedAt),
-          gte(simulations.completedAt, thirtyDaysAgo)
-        ];
-        
-        if (input?.userId) {
-          whereConditions.push(eq(simulations.userId, input.userId));
-        }
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-        const results = await db
-          .select({
-            date: sql<string>`date(${simulations.completedAt})`,
-            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
-            simulationsCount: sql<number>`count(*)`
-          })
-          .from(simulations)
-          .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
-          .groupBy(sql`date(${simulations.completedAt})`)
-          .orderBy(sql`date(${simulations.completedAt})`);
+            const whereConditions = [
+              eq(simulations.status, 'completed'),
+              isNotNull(simulations.completedAt),
+              gte(simulations.completedAt, thirtyDaysAgo)
+            ];
 
-        return results;
+            if (input?.userId) {
+              whereConditions.push(eq(simulations.userId, input.userId));
+            }
+
+            const results = await db
+              .select({
+                date: sql<string>`date(${simulations.completedAt})`,
+                averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+                simulationsCount: sql<number>`count(*)`
+              })
+              .from(simulations)
+              .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+              .groupBy(sql`date(${simulations.completedAt})`)
+              .orderBy(sql`date(${simulations.completedAt})`);
+
+            return results;
+          },
+          CACHE_STRATEGIES.analytics.tags
+        );
       }),
 
     getLeaderboard: demoUserProcedure
@@ -951,51 +979,69 @@ export const appRouter = router({
         department: z.string().optional(),
       }))
       .query(async ({ input }) => {
-        const db = await getDb();
-        if (!db) throw new Error('Database connection failed');
+        const cacheKey = `analytics:leaderboard:${input.limit}:${input.userId || 'all'}`;
 
-        const whereConditions = [eq(simulations.status, 'completed')];
-        
-        if (input.userId) {
-          whereConditions.push(eq(simulations.userId, input.userId));
-        }
+        return await withCache(
+          cacheKey,
+          CACHE_STRATEGIES.leaderboard.ttl,
+          async () => {
+            const db = await getDb();
+            if (!db) throw new Error('Database connection failed');
 
-        const results = await db
-          .select({
-            userId: simulations.userId,
-            userName: sql<string>`null`,
-            averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
-            completedSimulations: sql<number>`count(*)`,
-            totalPoints: sql<number>`sum(${simulations.pointsEarned})`
-          })
-          .from(simulations)
-          .where(and(...whereConditions))
-          .groupBy(simulations.userId)
-          .orderBy(
-            desc(sql`avg(${simulations.overallScore})`),
-            desc(sql`count(*)`)
-          )
-          .limit(input.limit);
+            const whereConditions = [eq(simulations.status, 'completed')];
 
-        return results;
+            if (input.userId) {
+              whereConditions.push(eq(simulations.userId, input.userId));
+            }
+
+            const results = await db
+              .select({
+                userId: simulations.userId,
+                userName: sql<string>`null`,
+                averageScore: sql<number>`round(avg(${simulations.overallScore}))`,
+                completedSimulations: sql<number>`count(*)`,
+                totalPoints: sql<number>`sum(${simulations.pointsEarned})`
+              })
+              .from(simulations)
+              .where(and(...whereConditions))
+              .groupBy(simulations.userId)
+              .orderBy(
+                desc(sql`avg(${simulations.overallScore})`),
+                desc(sql`count(*)`)
+              )
+              .limit(input.limit);
+
+            return results;
+          },
+          CACHE_STRATEGIES.leaderboard.tags
+        );
       }),
 
     getAgentsList: demoUserProcedure
       .query(async () => {
-        const db = await getDb();
-        if (!db) throw new Error('Database connection failed');
+        const cacheKey = 'analytics:agents-list';
 
-        const results = await db
-          .select({
-            id: users.id,
-            name: users.name,
-            email: users.email,
-          })
-          .from(users)
-          .where(eq(users.role, 'agente'))
-          .limit(100);
+        return await withCache(
+          cacheKey,
+          CACHE_STRATEGIES.scenario.ttl,
+          async () => {
+            const db = await getDb();
+            if (!db) throw new Error('Database connection failed');
 
-        return results;
+            const results = await db
+              .select({
+                id: users.id,
+                name: users.name,
+                email: users.email,
+              })
+              .from(users)
+              .where(eq(users.role, 'agente'))
+              .limit(100);
+
+            return results;
+          },
+          CACHE_STRATEGIES.scenario.tags
+        );
       }),
   }),
   supabase: router({

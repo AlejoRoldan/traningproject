@@ -1,9 +1,12 @@
 /**
  * Rate Limiter Middleware
  * Protege endpoints costosos (OpenAI) contra abuso y DoS
+ *
+ * Uses Redis for distributed rate limiting
  */
 
 import { TRPCError } from '@trpc/server';
+import { getRedisService } from '../cache/redis.service';
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
@@ -11,6 +14,7 @@ interface RateLimitConfig {
   message?: string;
 }
 
+// Fallback in-memory store for development/offline mode
 interface RateLimitStore {
   [key: string]: {
     count: number;
@@ -18,48 +22,78 @@ interface RateLimitStore {
   };
 }
 
-// In-memory store (for production, use Redis)
-const store: RateLimitStore = {};
+const fallbackStore: RateLimitStore = {};
 
 /**
  * Create a rate limiter for a specific endpoint
+ * Uses Redis with fallback to in-memory store
  * @param config Rate limit configuration
  * @returns Function to check rate limit
  */
 export function createRateLimiter(config: RateLimitConfig) {
   const { windowMs, maxRequests, message = 'Too many requests, please try again later.' } = config;
+  const redis = getRedisService();
 
-  return function rateLimiter(identifier: string): void {
+  return async function rateLimiter(identifier: string): Promise<void> {
     const now = Date.now();
     const key = `ratelimit:${identifier}`;
+    const windowSeconds = Math.ceil(windowMs / 1000);
 
-    if (!store[key]) {
-      store[key] = {
-        count: 1,
-        resetTime: now + windowMs,
-      };
-      return;
-    }
+    try {
+      // Try to use Redis first
+      const currentCount = await redis.increment(key, 1);
 
-    const record = store[key];
+      // Set expiration on first request
+      if (currentCount === 1) {
+        await redis.expire(key, windowSeconds);
+      }
 
-    // Reset if window has passed
-    if (now > record.resetTime) {
-      record.count = 1;
-      record.resetTime = now + windowMs;
-      return;
-    }
+      // Check limit
+      if (currentCount > maxRequests) {
+        const ttl = await redis.ttl(key);
+        const retryAfter = ttl > 0 ? ttl : windowSeconds;
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: `${message} Retry after ${retryAfter} seconds.`,
+        });
+      }
+    } catch (error) {
+      // Fallback to in-memory store if Redis fails
+      if (error instanceof TRPCError) {
+        throw error;
+      }
 
-    // Increment counter
-    record.count++;
+      console.warn('[RateLimiter] Redis unavailable, using fallback store');
 
-    // Check limit
-    if (record.count > maxRequests) {
-      const retryAfter = Math.ceil((record.resetTime - now) / 1000);
-      throw new TRPCError({
-        code: 'TOO_MANY_REQUESTS',
-        message: `${message} Retry after ${retryAfter} seconds.`,
-      });
+      // Use fallback store
+      if (!fallbackStore[key]) {
+        fallbackStore[key] = {
+          count: 1,
+          resetTime: now + windowMs,
+        };
+        return;
+      }
+
+      const record = fallbackStore[key];
+
+      // Reset if window has passed
+      if (now > record.resetTime) {
+        record.count = 1;
+        record.resetTime = now + windowMs;
+        return;
+      }
+
+      // Increment counter
+      record.count++;
+
+      // Check limit
+      if (record.count > maxRequests) {
+        const retryAfter = Math.ceil((record.resetTime - now) / 1000);
+        throw new TRPCError({
+          code: 'TOO_MANY_REQUESTS',
+          message: `${message} Retry after ${retryAfter} seconds.`,
+        });
+      }
     }
   };
 }
@@ -90,13 +124,14 @@ export const transcriptionRateLimiter = createRateLimiter({
 });
 
 /**
- * Cleanup old entries from store (run periodically)
+ * Cleanup old entries from fallback store (run periodically)
+ * Redis handles TTL automatically
  */
 export function cleanupRateLimitStore(): void {
   const now = Date.now();
-  for (const key in store) {
-    if (store[key].resetTime < now) {
-      delete store[key];
+  for (const key in fallbackStore) {
+    if (fallbackStore[key].resetTime < now) {
+      delete fallbackStore[key];
     }
   }
 }
