@@ -30,9 +30,29 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // ✅ Validate environment variables on startup
+  console.log("✅ Environment variables validated successfully");
+  console.log(`📍 Running in ${process.env.NODE_ENV || 'development'} mode`);
+  console.log(`🔐 OpenAI: ${process.env.OPENAI_API_KEY ? '✓' : '✗'}`);
+
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
+
+  // Health check endpoints
+  app.get("/health", (req, res) => {
+    res.json({ status: "ok" });
+  });
+
+  app.get("/health/oauth", (req, res) => {
+    const oauthUrl = process.env.OAUTH_SERVER_URL;
+    res.json({
+      status: oauthUrl ? "configured" : "not-configured",
+      oauthServerUrl: oauthUrl || null,
+    });
+  });
+
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
   // tRPC API

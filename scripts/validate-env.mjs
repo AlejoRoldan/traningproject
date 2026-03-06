@@ -15,6 +15,7 @@
 import { z } from 'zod';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
+import 'dotenv/config';
 
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const colors = {
